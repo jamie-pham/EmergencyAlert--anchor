@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlertAU — You Know Exactly Why You're At Risk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f2ec;--bg2:#ece9e1;--surface:#fff;--navy:#0c1d35;--navy2:#163050;--teal:#006d60;--teal2:#008a7a;--red:#b83025;--red2:#d9382c;--amber:#a85c0a;--text:#181824;--text2:#374155;--text3:#647188;--border:#d5d0c6;--border2:#bfb9ae;--shadow:0 2px 20px rgba(12,29,53,.07);--shadow2:0 10px 48px rgba(12,29,53,.13);--r:14px;--r2:10px;--font:'Sora',sans-serif;--mono:'DM Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:17px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+.skip{position:fixed;top:-100%;left:16px;z-index:9999;background:var(--navy);color:#fff;padding:12px 20px;border-radius:var(--r2);font-weight:600;text-decoration:none;transition:top .2s}
+.skip:focus{top:12px}
+
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(244,242,236,.97);border-bottom:1.5px solid var(--border);backdrop-filter:blur(12px)}
+.hdr{max-width:1200px;margin:0 auto;padding:0 40px;height:70px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo-mark{width:42px;height:42px;border-radius:10px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-text strong{display:block;font-size:15px;font-weight:800;color:var(--navy);letter-spacing:-.2px}
+.logo-text span{font-size:11px;color:var(--text3)}
+nav{display:flex;align-items:center;gap:6px}
+.nl{font-size:13px;font-weight:600;color:var(--text2);text-decoration:none;padding:8px 14px;border-radius:var(--r2);transition:all .15s}
+.nl:hover{background:var(--bg2);color:var(--navy)}
+.nc{background:var(--red);color:#fff;font-size:13px;font-weight:800;text-decoration:none;padding:10px 20px;border-radius:var(--r2);transition:all .15s}
+.nc:hover{background:var(--red2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(184,48,37,.3)}
+
+/* HERO */
+.hero{padding:130px 40px 0;background:var(--surface);border-bottom:1.5px solid var(--border);overflow:hidden;position:relative}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 55% 60% at 70% 45%,rgba(0,109,96,.06) 0%,transparent 65%),radial-gradient(ellipse 35% 50% at 10% 85%,rgba(184,48,37,.05) 0%,transparent 55%);pointer-events:none}
+.hero-rings{position:absolute;right:-160px;top:-140px;width:700px;height:700px;pointer-events:none;opacity:.3}
+.hero-rings circle{fill:none;stroke:var(--navy);stroke-width:.5}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;position:relative;z-index:1}
+.why-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(0,109,96,.09);border:1.5px solid rgba(0,109,96,.22);padding:8px 16px;border-radius:100px;margin-bottom:26px}
+.why-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);animation:wdot 2s infinite}
+@keyframes wdot{0%,100%{box-shadow:0 0 0 0 rgba(0,109,96,.5)}50%{box-shadow:0 0 0 6px rgba(0,109,96,0)}}
+.why-pill span{font-size:12px;font-weight:700;color:var(--teal);letter-spacing:.5px;text-transform:uppercase}
+h1{font-size:clamp(34px,4.2vw,60px);font-weight:900;line-height:1.06;letter-spacing:-1.5px;color:var(--navy);margin-bottom:20px}
+h1 .la{color:var(--teal);display:block}
+.hero-quote{background:rgba(12,29,53,.04);border-left:3px solid var(--teal);border-radius:0 var(--r2) var(--r2) 0;padding:14px 18px;margin-bottom:36px;max-width:500px}
+.hero-quote p{font-size:15px;color:var(--navy);line-height:1.65}
+.hero-quote strong{font-weight:700;color:var(--teal)}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:56px}
+.btn-p{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 30px;border-radius:var(--r);transition:all .2s;box-shadow:0 4px 20px rgba(12,29,53,.2)}
+.btn-p:hover{background:var(--navy2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(12,29,53,.25)}
+.btn-s{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--navy);font-size:15px;font-weight:600;text-decoration:none;padding:15px 26px;border-radius:var(--r);border:2px solid var(--border2);transition:all .2s}
+.btn-s:hover{border-color:var(--navy);background:rgba(12,29,53,.04)}
+.hero-stats{display:flex;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.hs{flex:1;padding:22px 24px;border-right:1.5px solid var(--border);transition:background .2s}
+.hs:last-child{border-right:none}
+.hs:hover{background:var(--bg)}
+.hs-n{font-size:34px;font-weight:900;font-family:var(--mono);line-height:1;margin-bottom:4px}
+.hs-l{font-size:11px;color:var(--text3);font-weight:500}
+
+/* NOTIFICATION STACK (hero right) */
+.notif-stack{display:flex;flex-direction:column;gap:10px;padding-bottom:40px}
+.nc-card{background:var(--surface);border-radius:16px;overflow:hidden;box-shadow:var(--shadow2);border:1px solid var(--border);transition:transform .2s}
+.nc-card:hover{transform:translateY(-3px)}
+.nc-critbar{background:var(--red);padding:10px 16px;display:flex;align-items:center;gap:10px}
+.nc-critbar span{font-size:10px;font-weight:800;color:#fff;letter-spacing:1.5px;text-transform:uppercase;flex:1}
+.nc-critbar time{font-size:10px;color:rgba(255,255,255,.7)}
+.nc-critbody{padding:14px 16px;background:#fff}
+.nc-crittitle{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:8px;line-height:1.3}
+/* THE WHY BOX */
+.nc-why{background:rgba(184,48,37,.07);border:1px solid rgba(184,48,37,.2);border-radius:var(--r2);padding:10px 12px;margin-bottom:10px}
+.nc-why-lbl{font-size:10px;font-weight:800;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.nc-why-txt{font-size:13px;color:var(--text);line-height:1.6;font-weight:500}
+.nc-acts{display:flex;gap:8px}
+.nc-btn-r{flex:1;background:var(--red);color:#fff;border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:800;cursor:pointer}
+.nc-btn-g{flex:1;background:rgba(12,29,53,.07);color:var(--navy);border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:700;cursor:pointer}
+.nc-std{padding:12px 14px;background:#fff;display:flex;gap:12px;align-items:flex-start}
+.nc-std-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.nc-std-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:2px;line-height:1.3}
+.nc-std-sub{font-size:12px;color:var(--text3);line-height:1.5}
+.nc-std-why{font-size:11px;font-weight:700;color:var(--teal);margin-top:4px}
+.nc-std-time{font-size:10px;color:var(--text3);flex-shrink:0;margin-top:2px}
+
+/* SECTION BASE */
+.section{padding:96px 40px}
+.section.alt{background:var(--bg2)}
+.si{max-width:1200px;margin:0 auto}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:26px;height:2px;background:var(--teal);border-radius:1px;flex-shrink:0}
+h2{font-size:clamp(28px,3vw,46px);font-weight:900;line-height:1.1;letter-spacing:-1px;color:var(--navy);margin-bottom:16px}
+.lead{font-size:18px;color:var(--text2);line-height:1.72;font-weight:300;max-width:620px;margin-bottom:60px}
+
+/* DIFFERENCE SECTION */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:72px;box-shadow:var(--shadow)}
+.diff-col{padding:40px 36px;background:var(--surface)}
+.diff-col.theirs{background:var(--bg2)}
+.diff-badge{display:inline-block;font-size:11px;font-weight:800;padding:5px 14px;border-radius:100px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:28px}
+.badge-old{background:rgba(100,113,136,.12);color:var(--text3);border:1px solid rgba(100,113,136,.2)}
+.badge-new{background:rgba(0,109,96,.12);color:var(--teal);border:1px solid rgba(0,109,96,.25)}
+.diff-item{display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.diff-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.di-icon{font-size:20px;flex-shrink:0;margin-top:2px;width:30px;text-align:center}
+.di-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.di-desc{font-size:13px;color:var(--text2);line-height:1.6}
+.diff-item.bad .di-title{color:var(--text3)}
+.diff-item.bad .di-desc{color:var(--text3)}
+
+/* WHY SCENARIOS */
+.why-showcase{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow2);margin-bottom:60px}
+.ws-hdr{background:var(--navy);padding:18px 26px;display:flex;align-items:center;justify-content:space-between}
+.ws-hdr-title{font-size:14px;font-weight:700;color:#fff}
+.ws-live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#4ade80}
+.wsl-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:wdot 1.5s infinite;display:inline-block}
+.why-scenarios{display:grid;grid-template-columns:repeat(3,1fr)}
+.ws{padding:26px;border-right:1px solid var(--border);transition:background .2s;cursor:pointer}
+.ws:last-child{border-right:none}
+.ws:hover{background:rgba(0,109,96,.03)}
+.ws-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ws-icon{font-size:22px}
+.ws-name{font-size:13px;font-weight:800;color:var(--navy)}
+.ws-risk{font-size:10px;font-weight:800;padding:2px 8px;border-radius:100px;letter-spacing:.5px;text-transform:uppercase}
+.ws-who{font-size:13px;color:var(--text3);margin-bottom:10px;line-height:1.5}
+/* THE WHY BOX — hero of this section */
+.ws-why{background:rgba(0,109,96,.07);border:1.5px solid rgba(0,109,96,.2);border-radius:var(--r2);padding:12px 14px;margin-bottom:10px}
+.ws-why-lbl{font-size:9px;font-weight:800;color:var(--teal);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.ws-why-txt{font-size:13px;color:var(--navy);font-weight:600;line-height:1.6}
+.ws-action{font-size:12px;font-weight:600;color:var(--text3);line-height:1.6;border-top:1px solid var(--border);padding-top:10px}
+
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:64px}
+.how-card{background:var(--surface);border-radius:var(--r);border:1.5px solid var(--border);padding:28px 24px;transition:all .2s;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.how-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal);transform:scaleX(0);transition:transform .2s;transform-origin:left}
+.how-card:hover{transform:translateY(-4px);box-shadow:var(--shadow2);border-color:rgba(0,109,96,.3)}
+.how-card:hover::before{transform:scaleX(1)}
+.how-card.hl{border-color:rgba(0,109,96,.35);background:rgba(0,109,96,.03)}
+.how-card.hl::before{transform:scaleX(1)}
+.how-card.hl h3{color:var(--teal)}
+.how-num{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--teal);letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.how-num::after{content:'';flex:1;height:1px;background:var(--border)}
+.how-icon{font-size:32px;margin-bottom:14px;display:block;line-height:1}
+.how-card h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.how-card p{font-size:13px;color:var(--text2);line-height:1.65}
+.sources-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.sc{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:24px;display:flex;gap:16px;align-items:flex-start;transition:all .2s;box-shadow:var(--shadow)}
+.sc:hover{border-color:rgba(0,109,96,.3);transform:translateY(-2px);box-shadow:var(--shadow2)}
+.sc-icon{width:44px;height:44px;border-radius:9px;background:var(--bg2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.sc h4{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:5px}
+.sc p{font-size:13px;color:var(--text2);line-height:1.6}
+.free-tag{display:inline-block;margin-top:8px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 10px;border-radius:100px;background:rgba(0,109,96,.1);color:var(--teal);border:1px solid rgba(0,109,96,.25)}
+
+/* DEMO */
+.demo-wrap{border-radius:16px;overflow:hidden;border:1.5px solid var(--border);box-shadow:var(--shadow2)}
+.demo-chrome{background:var(--navy);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.dc-dots{display:flex;gap:7px}
+.dc-dot{width:12px;height:12px;border-radius:50%}
+.dc-url{background:rgba(255,255,255,.1);border-radius:6px;padding:5px 16px;font-size:12px;color:rgba(255,255,255,.55);font-family:var(--mono)}
+.dc-live{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#4ade80}
+.demo-layout{display:grid;grid-template-columns:1fr 360px;height:560px}
+.demo-map{position:relative;overflow:hidden;background:#ddeaf5}
+#demoCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+.map-top{position:absolute;top:0;left:0;right:0;padding:16px 18px;background:linear-gradient(to bottom,rgba(12,29,53,.88) 55%,transparent);display:flex;align-items:center;justify-content:space-between;z-index:10;pointer-events:none}
+.map-name{font-size:18px;font-weight:900;color:#fff;letter-spacing:-.3px}
+.map-name sup{font-size:9px;color:var(--red2);font-weight:700}
+.map-badge{display:flex;align-items:center;gap:5px;background:rgba(12,29,53,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:100px;font-size:11px;font-weight:700;color:#4ade80;pointer-events:all}
+.map-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:wdot 1.5s infinite}
+.map-leg{position:absolute;bottom:0;left:0;right:0;padding:10px 16px;background:linear-gradient(to top,rgba(12,29,53,.8) 55%,transparent);display:flex;gap:16px;z-index:10;pointer-events:none;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.85);font-weight:500}
+.legdot{width:8px;height:8px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4)}
+.dsb{background:var(--surface);border-left:1.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.dsb-hdr{padding:14px 14px 0;flex-shrink:0}
+.dsb-ey{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.dsb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.dst{background:var(--bg);border-radius:8px;padding:9px 7px;text-align:center;border:1.5px solid var(--border)}
+.dst-n{font-size:21px;font-weight:800;font-family:var(--mono);line-height:1;margin-bottom:2px}
+.dst-l{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.4px}
+.filters{display:flex;gap:5px;padding-bottom:10px;overflow-x:auto}
+.filters::-webkit-scrollbar{display:none}
+.fchip{font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-family:var(--font);white-space:nowrap;transition:all .15s;flex-shrink:0}
+.fchip:hover{border-color:var(--teal);color:var(--teal)}
+.fchip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.inc-list{flex:1;overflow-y:auto;padding:0 10px 10px}
+.inc-list::-webkit-scrollbar{width:3px}
+.inc-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.inc-card{padding:12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);margin-bottom:7px;cursor:pointer;transition:all .15s;border-left-width:4px}
+.inc-card:hover{border-color:var(--teal);background:rgba(0,109,96,.03);transform:translateX(2px)}
+.inc-card.sel{border-color:var(--navy);background:rgba(12,29,53,.04)}
+.inc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;margin-bottom:4px}
+.inc-name{font-size:12px;font-weight:700;color:var(--navy);line-height:1.3}
+.rbadge{font-size:9px;font-weight:800;padding:2px 8px;border-radius:100px;white-space:nowrap;flex-shrink:0;letter-spacing:.5px;text-transform:uppercase}
+.inc-meta{font-size:11px;color:var(--text3)}
+.detail-panel{border-top:1.5px solid var(--border);background:var(--bg);flex-shrink:0;max-height:250px;overflow-y:auto}
+.detail-panel::-webkit-scrollbar{width:3px}
+.detail-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.dp-inner{padding:14px}
+.dp-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.dp-icon{font-size:22px;flex-shrink:0}
+.dp-name{font-size:13px;font-weight:700;color:var(--navy);flex:1;line-height:1.3}
+.dp-risk{font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;flex-shrink:0}
+.ai-tag{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:rgba(0,109,96,.1);color:var(--teal);border:1px solid rgba(0,109,96,.25);padding:3px 9px;border-radius:100px;flex-shrink:0}
+/* ★ THE WHY BOX ★ */
+.dp-why{background:rgba(184,48,37,.07);border:1.5px solid rgba(184,48,37,.22);border-radius:var(--r2);padding:10px 12px;margin-bottom:8px}
+.dp-why-lbl{font-size:9px;font-weight:800;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.dp-why-txt{font-size:12px;color:var(--text);font-weight:600;line-height:1.6}
+.dp-ai{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px}
+.loader{display:flex;align-items:center;gap:8px;padding:6px 0}
+.loader span{display:inline-flex;gap:3px}
+.loader span i{width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;animation:dp 1.2s infinite;font-style:normal}
+.loader span i:nth-child(2){animation-delay:.2s}
+.loader span i:nth-child(3){animation-delay:.4s}
+@keyframes dp{0%,80%,100%{opacity:.15;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+.loader p{font-size:12px;color:var(--text3)}
+.dp-btns{display:flex;gap:7px}
+.dp-btn{flex:1;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--navy);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
+.dp-btn:hover{border-color:var(--navy);background:var(--navy);color:#fff}
+.dp-btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.dp-btn.danger:hover{background:var(--red2)}
+.empty-dp{font-size:13px;color:var(--text3);padding:20px;text-align:center;line-height:1.6}
+
+/* MOBILE SECTION */
+.mob-section{padding:96px 40px;background:var(--navy);position:relative;overflow:hidden}
+.mob-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 8% 55%,rgba(0,109,96,.14) 0%,transparent 60%),radial-gradient(ellipse 35% 50% at 92% 40%,rgba(184,48,37,.1) 0%,transparent 55%);pointer-events:none}
+.mob-section .eyebrow{color:var(--teal2)}
+.mob-section .eyebrow::before{background:var(--teal2)}
+.mob-section h2{color:#fff}
+.mob-section .lead{color:rgba(255,255,255,.58)}
+.mob-layout{display:grid;grid-template-columns:1fr 280px 1fr;gap:0;align-items:start;position:relative;z-index:1}
+.mob-feats{padding-top:50px;display:flex;flex-direction:column;gap:20px}
+.mf{padding:18px 20px;border-radius:var(--r);border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);transition:all .2s;cursor:pointer}
+.mf:hover,.mf.active{border-color:rgba(0,138,122,.4);background:rgba(0,109,96,.12)}
+.mf.why-feat{border-color:rgba(0,138,122,.3);background:rgba(0,109,96,.1)}
+.mf.why-feat h4{color:var(--teal2)}
+.mf-icon{font-size:20px;margin-bottom:7px;display:block}
+.mf h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px}
+.mf p{font-size:12px;color:rgba(255,255,255,.5);line-height:1.6}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;padding:0 12px}
+.phone-frame{width:248px;background:#0a0f1a;border-radius:44px;border:8px solid #1e2840;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 32px 80px rgba(0,0,0,.5);position:relative;overflow:hidden}
+.phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:88px;height:25px;background:#0a0f1a;border-radius:0 0 16px 16px;z-index:20;display:flex;align-items:center;justify-content:center;gap:6px}
+.notch-spk{width:28px;height:4px;border-radius:2px;background:#1e2840}
+.notch-cam{width:8px;height:8px;border-radius:50%;background:#1e2840;border:1px solid rgba(255,255,255,.08)}
+.phone-screen{height:500px;overflow:hidden;position:relative;border-radius:36px;background:var(--bg)}
+.pscr{position:absolute;inset:0;display:flex;flex-direction:column;transition:opacity .4s,transform .4s}
+.pscr.off{opacity:0;pointer-events:none;transform:scale(.97)}
+.psb{padding:28px 14px 7px;background:var(--navy);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.psb-t{font-size:12px;font-weight:700;color:#fff;font-family:var(--mono)}
+.psb-i{font-size:9px;color:rgba(255,255,255,.7)}
+.phd{background:var(--navy);padding:2px 14px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.phd-n{font-size:17px;font-weight:900;color:#fff;letter-spacing:-.3px}
+.phd-n sup{font-size:8px;color:var(--red2);font-weight:700}
+.phd-live{display:flex;align-items:center;gap:4px;font-size:9px;font-weight:700;color:#4ade80}
+.phd-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;animation:wdot 1.5s infinite}
+.pmap-a{flex:1;position:relative;overflow:hidden;background:#ddeaf5;min-height:0}
+#phoneCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ppill{position:absolute;top:8px;left:8px;right:8px;background:var(--red);color:#fff;border-radius:8px;padding:8px 10px;z-index:10;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 16px rgba(184,48,37,.4)}
+.ppill-icon{font-size:15px;flex-shrink:0}
+.ppill-title{font-size:10px;font-weight:800}
+.ppill-sub{font-size:9px;opacity:.85;margin-top:1px}
+.ppill-arr{font-size:13px;opacity:.8;margin-left:auto}
+.pfab{position:absolute;bottom:8px;right:8px;width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:10;cursor:pointer;border:none;font-family:var(--font)}
+.ptab-bar{background:#fff;border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:6px}
+.ptab-b{flex:1;padding:7px 4px 3px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:transparent}
+.ptab-icon{font-size:17px;line-height:1}
+.ptab-lbl{font-size:9px;font-weight:600;color:var(--text3);font-family:var(--font)}
+.ptab-b.on .ptab-lbl{color:var(--navy)}
+/* LOCK */
+.plock{background:linear-gradient(160deg,#0d1f3c 0%,#280a08 55%,#0d1a30 100%);position:relative}
+.plock-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:28px 28px}
+.plock-body{position:relative;z-index:2;display:flex;flex-direction:column;height:100%}
+.plsb{padding:28px 14px 6px;display:flex;justify-content:space-between}
+.pl-time{text-align:center;padding:8px 14px 14px}
+.pl-big{font-size:52px;font-weight:200;color:#fff;letter-spacing:-2px;line-height:1;font-family:var(--mono)}
+.pl-date{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px}
+.pcrit{margin:0 10px;border-radius:16px;overflow:hidden;cursor:pointer}
+.pcrit-bar{background:var(--red);padding:8px 12px;display:flex;align-items:center;gap:8px}
+.pcrit-bar span{font-size:9px;font-weight:800;color:#fff;letter-spacing:1.5px;text-transform:uppercase;flex:1}
+.pcrit-bar time{font-size:9px;color:rgba(255,255,255,.7)}
+.pcrit-body{background:rgba(8,5,4,.93);padding:12px}
+.pcrit-title{font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;line-height:1.3}
+/* ★ WHY IN NOTIFICATION ★ */
+.pcrit-why{background:rgba(184,48,37,.2);border:1px solid rgba(184,48,37,.4);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.pcrit-why-lbl{font-size:8px;font-weight:800;color:#f87171;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.pcrit-why-txt{font-size:11px;color:rgba(255,255,255,.9);font-weight:600;line-height:1.55}
+.pcrit-acts{display:flex;gap:6px}
+.pcrit-br{flex:1;background:var(--red);border-radius:8px;padding:8px;text-align:center;font-size:10px;font-weight:800;color:#fff}
+.pcrit-bg{flex:1;background:rgba(255,255,255,.1);border-radius:8px;padding:8px;text-align:center;font-size:10px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.15)}
+.pstack{margin:8px 10px 0;border-radius:12px;overflow:hidden;background:rgba(15,25,45,.88);border:1px solid rgba(255,255,255,.07)}
+.pstack-inner{padding:10px 11px;display:flex;align-items:center;gap:9px}
+.pstack-why{font-size:9px;color:rgba(74,222,128,.85);font-weight:700;margin-top:2px}
+/* LIST */
+.plist-hdr{background:var(--navy);padding:28px 14px 12px;flex-shrink:0}
+.plist-title{font-size:17px;font-weight:800;color:#fff;margin-bottom:2px}
+.plist-sub{font-size:10px;color:rgba(255,255,255,.5)}
+.plist-stats{display:flex;gap:6px;padding:9px 9px 0;flex-shrink:0}
+.pmst{flex:1;background:var(--surface);border-radius:7px;padding:8px 5px;text-align:center;border:1px solid var(--border)}
+.pmst-n{font-size:17px;font-weight:800;font-family:var(--mono);line-height:1}
+.pmst-l{font-size:9px;color:var(--text3);font-weight:600;margin-top:1px}
+.pinc-scroll{flex:1;overflow-y:auto;padding:7px}
+.pinc-scroll::-webkit-scrollbar{display:none}
+.pinc{background:var(--surface);border-radius:9px;border:1.5px solid var(--border);border-left-width:3px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.pinc:active{transform:scale(.98)}
+.pinc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:2px}
+.pinc-name{font-size:11px;font-weight:700;color:var(--navy);line-height:1.3;flex:1}
+.pinc-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0}
+.pinc-meta{font-size:9px;color:var(--text3)}
+.pinc-why{font-size:9px;font-weight:700;color:var(--teal);margin-top:3px}
+/* DETAIL */
+.pdet-hdr{background:var(--navy);padding:28px 14px 12px;flex-shrink:0}
+.pdet-back{font-size:11px;color:rgba(255,255,255,.55);margin-bottom:7px;cursor:pointer}
+.pdet-title{font-size:15px;font-weight:800;color:#fff;line-height:1.25}
+.pdet-body{flex:1;overflow-y:auto;padding:10px 10px 70px}
+.pdet-body::-webkit-scrollbar{display:none}
+.prisk{border-radius:10px;padding:10px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px}
+.prisk-icon{font-size:26px;flex-shrink:0}
+.prisk-title{font-size:13px;font-weight:800;margin-bottom:2px}
+.prisk-sub{font-size:10px;opacity:.8;line-height:1.5}
+/* ★ WHY BOX IN DETAIL ★ */
+.pwhy{background:rgba(184,48,37,.08);border:1.5px solid rgba(184,48,37,.25);border-radius:10px;padding:10px 12px;margin-bottom:9px}
+.pwhy-lbl{font-size:8px;font-weight:800;color:var(--red);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.pwhy-txt{font-size:12px;color:var(--navy);font-weight:700;line-height:1.6}
+.pai-card{background:var(--surface);border-radius:10px;padding:11px 12px;border:1.5px solid rgba(0,109,96,.2);margin-bottom:9px}
+.pai-hdr{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.pai-hdr span{font-size:11px;font-weight:700;color:var(--navy)}
+.pai-badge{font-size:8px;font-weight:700;padding:2px 7px;border-radius:100px;background:rgba(0,109,96,.1);color:var(--teal);border:1px solid rgba(0,109,96,.2)}
+.pai-txt{font-size:11px;color:var(--text2);line-height:1.7}
+.pfixed{position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:9px 10px 14px;display:flex;gap:7px;z-index:20}
+.pfixed-btn{flex:1;padding:10px 7px;border-radius:9px;border:none;font-size:11px;font-weight:800;cursor:pointer;font-family:var(--font)}
+.pfixed-btn.red{background:var(--red);color:#fff}
+.pfixed-btn.out{background:transparent;color:var(--navy);border:1.5px solid var(--border)}
+.ptabs-outer{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.pto{font-size:11px;font-weight:700;padding:6px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.14);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;font-family:var(--font);transition:all .15s}
+.pto:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.8)}
+.pto.on{background:var(--teal);border-color:var(--teal);color:#fff}
+
+/* ACCESSIBILITY */
+.ac-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.ac{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:28px 24px;box-shadow:var(--shadow);transition:all .2s}
+.ac:hover{transform:translateY(-3px);box-shadow:var(--shadow2)}
+.ac-icon{font-size:32px;margin-bottom:14px;display:block}
+.ac h3{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.ac p{font-size:14px;color:var(--text2);line-height:1.65}
+
+/* FOOTER */
+footer{background:var(--navy);color:rgba(255,255,255,.65);padding:52px 40px}
+.fi{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.flogo{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.flogo-i{width:38px;height:38px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:17px}
+.flogo strong{display:block;font-size:14px;font-weight:800;color:#fff}
+.flogo span{font-size:10px;color:rgba(255,255,255,.45)}
+.fdesc{font-size:13px;line-height:1.7;color:rgba(255,255,255,.5);max-width:380px}
+.fr h4{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:14px}
+.ftags{display:flex;flex-wrap:wrap;gap:7px}
+.ftag{font-size:11px;font-weight:600;padding:4px 13px;border-radius:100px;border:1px solid rgba(255,255,255,.13);color:rgba(255,255,255,.55)}
+.fbot{max-width:1200px;margin:36px auto 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.09);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(255,255,255,.3);flex-wrap:wrap;gap:8px}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+.reveal:nth-child(2){transition-delay:.08s}
+.reveal:nth-child(3){transition-delay:.16s}
+.reveal:nth-child(4){transition-delay:.24s}
+
+/* RESPONSIVE */
+@media(max-width:960px){html{font-size:16px}.hero-inner{grid-template-columns:1fr;gap:40px}.notif-stack{display:none}.how-grid{grid-template-columns:repeat(2,1fr)}.sources-grid,.ac-grid{grid-template-columns:1fr}.demo-layout{grid-template-columns:1fr;height:auto}.dsb{max-height:380px}nav .nl{display:none}.fi{grid-template-columns:1fr}.diff-grid{grid-template-columns:1fr}.why-scenarios{grid-template-columns:1fr}.mob-layout{grid-template-columns:1fr}.mob-feats{display:none}}
+@media(max-width:600px){.section{padding:64px 20px}.hero{padding:110px 20px 0}.hdr{padding:0 20px}.how-grid{grid-template-columns:1fr}.hero-stats{flex-direction:column}.hs{border-right:none;border-bottom:1.5px solid var(--border)}.hs:last-child{border-bottom:none}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip">Skip to main content</a>
+
+<header role="banner">
+  <div class="hdr">
+    <a href="#" class="logo" aria-label="AlertAU Home">
+      <div class="logo-mark" aria-hidden="true">🛡️</div>
+      <div class="logo-text"><strong>AlertAU</strong><span>Personalised Emergency Intelligence</span></div>
+    </a>
+    <nav role="navigation" aria-label="Main navigation">
+      <a href="#difference" class="nl">Why It's Different</a>
+      <a href="#demo" class="nl">Live Demo</a>
+      <a href="#mobile" class="nl">Mobile App</a>
+      <a href="#demo" class="nc">See It In Action</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero" aria-labelledby="hero-h">
+  <svg class="hero-rings" viewBox="0 0 700 700" aria-hidden="true"><circle cx="350" cy="350" r="200"/><circle cx="350" cy="350" r="270"/><circle cx="350" cy="350" r="320"/></svg>
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="why-pill" role="status"><div class="why-dot" aria-hidden="true"></div><span>Location-specific · Reason-based alerts</span></div>
+      <h1 id="hero-h">Finally know exactly<br><span class="la">why you're at risk —</span>not just that you are.</h1>
+      <div class="hero-quote" role="blockquote">
+        <p>Every other emergency app tells you <strong>there's a fire nearby.</strong> AlertAU tells you <strong>why that fire is dangerous to you specifically</strong> — your distance, the wind direction, your evacuation route — in plain English, right now.</p>
+      </div>
+      <div class="hero-btns">
+        <a href="#demo" class="btn-p">See how it works →</a>
+        <a href="#mobile" class="btn-s">📱 Try mobile demo</a>
+      </div>
+      <div class="hero-stats" role="list" aria-label="Platform statistics">
+        <div class="hs" role="listitem"><div class="hs-n" style="color:var(--red)">You</div><div class="hs-l">Are the centre of every alert</div></div>
+        <div class="hs" role="listitem"><div class="hs-n" style="color:var(--teal)">&lt;30s</div><div class="hs-l">From satellite to your screen</div></div>
+        <div class="hs" role="listitem"><div class="hs-n" style="color:var(--amber)">WHY</div><div class="hs-l">Explained in plain English</div></div>
+      </div>
+    </div>
+    <div class="notif-stack" aria-label="Example personalised notifications">
+      <div class="nc-card">
+        <div class="nc-critbar"><span>🚨 AlertAU — Emergency Warning</span><time>now</time></div>
+        <div class="nc-critbody">
+          <div class="nc-crittitle">🔥 EVACUATE NOW — Gippsland Fire</div>
+          <div class="nc-why">
+            <div class="nc-why-lbl">⚠ Why you're at risk</div>
+            <div class="nc-why-txt">The fire is 12km south-east and wind is blowing directly toward your address at 35km/h. Estimated arrival time: under 20 minutes if conditions don't change.</div>
+          </div>
+          <div class="nc-acts"><div class="nc-btn-r">📞 Call 000</div><div class="nc-btn-g">My evacuation route →</div></div>
+        </div>
+      </div>
+      <div class="nc-card"><div class="nc-std"><div class="nc-std-icon">🌊</div><div style="flex:1"><div class="nc-std-title">Flood Warning — Murray River</div><div class="nc-std-sub">18km north · SES evacuation order</div><div class="nc-std-why">Your street is below the 12m flood line and in Zone B</div></div><div class="nc-std-time">2m ago</div></div></div>
+      <div class="nc-card"><div class="nc-std"><div class="nc-std-icon">🌡️</div><div style="flex:1"><div class="nc-std-title">Heatwave — Wimmera Region</div><div class="nc-std-sub">85km north-west · Day 3 of 5</div><div class="nc-std-why">Nearest cooling centre: Swan Hill Library — 2.3km away</div></div><div class="nc-std-time">8m ago</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- THE DIFFERENCE -->
+<section class="section" id="difference" aria-labelledby="diff-h">
+  <div class="si">
+    <div class="eyebrow" aria-hidden="true">The Core Difference</div>
+    <h2 id="diff-h">Every other app tells you there's an emergency.<br>We tell you why it affects <em style="font-style:normal;color:var(--teal)">you.</em></h2>
+    <p class="lead">Generic alerts cause panic and confusion. Location-specific, reason-based alerts cause action. That's the entire idea.</p>
+    <div class="diff-grid">
+      <div class="diff-col theirs">
+        <div class="diff-badge badge-old">Every other app</div>
+        <div class="diff-item bad"><div class="di-icon">🔔</div><div><div class="di-title">Generic broadcast alert</div><div class="di-desc">"Bushfire warning in Gippsland region." Sent to everyone in the state. No context about your specific situation.</div></div></div>
+        <div class="diff-item bad"><div class="di-icon">📍</div><div><div class="di-title">Approximate distance only</div><div class="di-desc">"Fire is nearby." No wind direction. No estimated threat time. No evacuation route for your actual address.</div></div></div>
+        <div class="diff-item bad"><div class="di-icon">📄</div><div><div class="di-title">Technical jargon</div><div class="di-desc">Fire behaviour indices, spotfire potential, containment percentages. Meaningless to most people under stress.</div></div></div>
+        <div class="diff-item bad"><div class="di-icon">🤷</div><div><div class="di-title">What should I actually do?</div><div class="di-desc">"Monitor conditions." No specific action. No nearest shelter. No phone number. Just more anxiety.</div></div></div>
+      </div>
+      <div class="diff-col">
+        <div class="diff-badge badge-new">AlertAU</div>
+        <div class="diff-item"><div class="di-icon">🎯</div><div><div class="di-title">Alert specific to your address</div><div class="di-desc">Your location is the centre of every risk calculation. Only alerts that genuinely affect you reach your screen.</div></div></div>
+        <div class="diff-item"><div class="di-icon" style="color:var(--teal)">⚠️</div><div><div class="di-title" style="color:var(--teal)">"Here's WHY you're at risk"</div><div class="di-desc">Wind direction relative to your home. Your distance from the fire. Your flood zone. Your elevation above river height. Calculated for you.</div></div></div>
+        <div class="diff-item"><div class="di-icon">🤖</div><div><div class="di-title">AI translates it into plain English</div><div class="di-desc">GPT-4o turns satellite data into "Leave now via Princes Highway. Fire will reach your street in under 20 minutes."</div></div></div>
+        <div class="diff-item"><div class="di-icon">✅</div><div><div class="di-title">One clear action, every time</div><div class="di-desc">Your nearest evacuation route. Your nearest cooling centre. Your nearest SES office. Tailored to your location — not a suburb, your actual street.</div></div></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:24px">
+      <div class="eyebrow" aria-hidden="true">See It In Practice</div>
+      <h3 style="font-size:clamp(22px,2.5vw,34px);font-weight:900;color:var(--navy);letter-spacing:-.5px;margin-bottom:8px">The same fire. Three different people.<br>Three different WHY messages.</h3>
+      <p style="font-size:16px;color:var(--text2);max-width:600px;font-weight:300;line-height:1.7;margin-bottom:28px">Because the fire doesn't affect everyone equally — and your alert shouldn't pretend it does.</p>
+    </div>
+    <div class="why-showcase">
+      <div class="ws-hdr"><span class="ws-hdr-title">Gippsland Complex Fire — Active Now</span><span class="ws-live"><span class="wsl-dot"></span>Live Risk Calculation</span></div>
+      <div class="why-scenarios">
+        <div class="ws reveal" tabindex="0">
+          <div class="ws-head"><span class="ws-icon">👴</span><div><div class="ws-name">Margaret, Traralgon</div><div class="ws-risk" style="background:rgba(184,48,37,.12);color:var(--red);border:1px solid rgba(184,48,37,.3)">HIGH</div></div></div>
+          <div class="ws-who">Elderly, lives alone. 8km from fire front. No car.</div>
+          <div class="ws-why"><div class="ws-why-lbl">⚠ Why Margaret is at risk</div><div class="ws-why-txt">Fire is 8km south-east. Wind is blowing directly north toward your home at 40km/h. You are in mandatory evacuation Zone A. No vehicle registered at your address.</div></div>
+          <div class="ws-action">Action: "Call SES on 132 500 now. A community transport vehicle is 6 minutes away to assist evacuation."</div>
+        </div>
+        <div class="ws reveal" tabindex="0">
+          <div class="ws-head"><span class="ws-icon">👨‍👩‍👧</span><div><div class="ws-name">The Nguyens, Sale</div><div class="ws-risk" style="background:rgba(168,92,10,.12);color:var(--amber);border:1px solid rgba(168,92,10,.3)">MED</div></div></div>
+          <div class="ws-who">Family with young children. 35km from fire.</div>
+          <div class="ws-why"><div class="ws-why-lbl">Why the Nguyens should prepare</div><div class="ws-why-txt">Fire is 35km south-east and currently moving away. However, a wind change forecast at 3pm may redirect the fire toward Sale. You are in Watch and Act zone.</div></div>
+          <div class="ws-action">Action: "Prepare your emergency kit now. If wind change occurs, evacuate via Princes Highway to Bairnsdale Recreation Centre."</div>
+        </div>
+        <div class="ws reveal" tabindex="0">
+          <div class="ws-head"><span class="ws-icon">👩‍💼</span><div><div class="ws-name">Priya, Melbourne CBD</div><div class="ws-risk" style="background:rgba(0,109,96,.1);color:var(--teal);border:1px solid rgba(0,109,96,.25)">LOW</div></div></div>
+          <div class="ws-who">Office worker. 145km from fire. Air quality concern.</div>
+          <div class="ws-why"><div class="ws-why-lbl">Why Priya is low risk but informed</div><div class="ws-why-txt">Fire is 145km east — no direct threat. Smoke particles are forecast to reach Melbourne CBD from 6pm. Air quality will peak as Poor around 9pm.</div></div>
+          <div class="ws-action">Action: "Stay indoors after 6pm if possible. Close windows. Air quality index will peak around 9pm tonight."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section alt" id="how" aria-labelledby="how-h">
+  <div class="si">
+    <div class="eyebrow" aria-hidden="true">Under the Hood</div>
+    <h2 id="how-h">How we calculate <em style="font-style:normal;color:var(--teal)">your</em> risk</h2>
+    <p class="lead">Four layers working together — from raw satellite data to a plain-English explanation on your phone in under 30 seconds.</p>
+    <div class="how-grid">
+      <div class="how-card reveal"><div class="how-num">01 — Collect</div><span class="how-icon">🛰️</span><h3>Live Data Ingestion</h3><p>NASA FIRMS satellite fire hotspots, Bureau of Meteorology severe weather feeds — pulled automatically every 5 minutes, 24 hours a day.</p></div>
+      <div class="how-card reveal"><div class="how-num">02 — Localise</div><span class="how-icon">📍</span><h3>Your-Location Risk Score</h3><p>Every incident is scored against <em>your</em> GPS coordinates — not a suburb or postcode. Wind direction, proximity, fire spread rate, flood zone, and your exact distance all factor in.</p></div>
+      <div class="how-card hl reveal"><div class="how-num">03 — Explain</div><span class="how-icon">💬</span><h3>The WHY Engine</h3><p>This is the core. GPT-4o takes the localised risk data and generates a specific, personal explanation of why <em>your address</em> is affected and what the threat timeline is.</p></div>
+      <div class="how-card reveal"><div class="how-num">04 — Alert</div><span class="how-icon">📲</span><h3>Personalised Push Alert</h3><p>Notifications include the WHY, not just the what. Only alerts relevant to your location reach you — so you're never overwhelmed, and you always know it's real.</p></div>
+    </div>
+    <div class="eyebrow" style="margin-bottom:22px" aria-hidden="true">Data Sources</div>
+    <div class="sources-grid">
+      <div class="sc reveal"><div class="sc-icon">🔥</div><div><h4>NASA FIRMS</h4><p>VIIRS satellite thermal hotspot detection — updated every 3 hours globally. Provides fire location, intensity, and spread direction used to calculate your personal risk.</p><span class="free-tag">Free API</span></div></div>
+      <div class="sc reveal"><div class="sc-icon">⛅</div><div><h4>Bureau of Meteorology</h4><p>Official Australian severe weather warnings, flood watches, heatwave alerts, and storm forecasts — used to calculate wind direction relative to your address.</p><span class="free-tag">Open Data</span></div></div>
+      <div class="sc reveal"><div class="sc-icon">🌍</div><div><h4>GDACS + Copernicus</h4><p>Global disaster alerting and EU satellite emergency mapping — enabling expansion to Europe with the same personalised WHY architecture already built.</p><span class="free-tag">EU Ready</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="section" id="demo" aria-labelledby="demo-h">
+  <div class="si">
+    <div class="eyebrow" aria-hidden="true">Interactive Demo</div>
+    <h2 id="demo-h">Click any incident. See exactly why it affects you.</h2>
+    <p class="lead">Notice the red <strong>"Why you are at risk"</strong> box on every incident — your distance, the wind direction, your flood zone. This is what makes AlertAU different from every other app.</p>
+    <div class="demo-wrap" role="application" aria-label="Interactive demo — click incidents to see personalised why-you-are-at-risk reasons">
+      <div class="demo-chrome" aria-hidden="true">
+        <div class="dc-dots"><div class="dc-dot" style="background:#ff5f57"></div><div class="dc-dot" style="background:#febc2e"></div><div class="dc-dot" style="background:#28c840"></div></div>
+        <div class="dc-url">alertau.app — Victoria — Your location: Melbourne CBD</div>
+        <div class="dc-live"><span class="map-dot"></span>Live</div>
+      </div>
+      <div class="demo-layout">
+        <div class="demo-map" role="img" aria-label="Map of Victoria showing emergency incidents">
+          <canvas id="demoCanvas" aria-hidden="true"></canvas>
+          <div class="map-top" aria-hidden="true">
+            <div class="map-name">Alert<sup>AU</sup></div>
+            <div class="map-badge"><span class="map-dot"></span>Victoria Live</div>
+          </div>
+          <div class="map-leg" aria-hidden="true">
+            <div class="leg"><div class="legdot" style="background:#e74c3c"></div>Bushfire</div>
+            <div class="leg"><div class="legdot" style="background:#2980b9"></div>Flood</div>
+            <div class="leg"><div class="legdot" style="background:#8e44ad"></div>Storm</div>
+            <div class="leg"><div class="legdot" style="background:#d35400"></div>Heatwave</div>
+          </div>
+        </div>
+        <div class="dsb" role="complementary" aria-label="Incident list and your personalised risk details">
+          <div class="dsb-hdr">
+            <div class="dsb-ey">Your Active Alerts</div>
+            <div class="dsb-stats">
+              <div class="dst"><div class="dst-n" style="color:var(--red)">2</div><div class="dst-l">High</div></div>
+              <div class="dst"><div class="dst-n" style="color:var(--amber)">2</div><div class="dst-l">Medium</div></div>
+              <div class="dst"><div class="dst-n" style="color:var(--teal)">2</div><div class="dst-l">Low</div></div>
+            </div>
+            <div class="filters" role="group" aria-label="Filter by type" id="filterBar"></div>
+          </div>
+          <div class="inc-list" id="incList" role="list"></div>
+          <div class="detail-panel" id="detailPanel" aria-live="polite">
+            <div class="empty-dp">← Tap any incident to see <strong>why it affects you specifically</strong> and your personalised safety instructions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOBILE DEMO -->
+<section class="mob-section section" id="mobile" aria-labelledby="mob-h">
+  <div class="si">
+    <div class="eyebrow">Mobile App</div>
+    <h2 id="mob-h" style="color:#fff">The WHY — right on your lock screen.</h2>
+    <p class="lead">When a life-threatening emergency is approaching your home, you shouldn't have to open an app to understand it. The reason you're at risk is in the notification itself.</p>
+    <div class="mob-layout">
+      <div class="mob-feats">
+        <div class="mf why-feat active" id="mf-lock" onclick="pS('lock')"><span class="mf-icon">🚨</span><h4>The WHY is in the notification</h4><p>Wind direction, your distance, estimated threat time — right on the locked screen. Not just "fire nearby."</p></div>
+        <div class="mf" id="mf-map" onclick="pS('map')"><span class="mf-icon">🗺️</span><h4>Your location is the centre</h4><p>The map is built around you. Every marker shows your distance from the incident, not a generic regional label.</p></div>
+        <div class="mf" id="mf-list" onclick="pS('list')"><span class="mf-icon">☰</span><h4>WHY visible in every card</h4><p>Each incident shows the specific reason it's relevant to your location — at a glance, before you even tap.</p></div>
+        <div class="mf" id="mf-detail" onclick="pS('detail')"><span class="mf-icon">🛡️</span><h4>Full WHY + plain-English brief</h4><p>Tap any incident for your complete personalised risk explanation and step-by-step safety instructions in plain English.</p></div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone-frame" role="img" aria-label="Mobile app showing personalised emergency alerts with WHY explanations">
+          <div class="phone-notch" aria-hidden="true"><div class="notch-spk"></div><div class="notch-cam"></div></div>
+          <div class="phone-screen">
+
+            <!-- LOCK SCREEN -->
+            <div class="pscr" id="ps-lock">
+              <div class="plock">
+                <div class="plock-grid"></div>
+                <div class="plock-body">
+                  <div class="plsb"><span style="font-size:12px;font-weight:700;color:#fff;font-family:var(--mono)">9:41</span><span style="font-size:9px;color:rgba(255,255,255,.7)">●●● WiFi 🔋</span></div>
+                  <div class="pl-time"><div class="pl-big">9:41</div><div class="pl-date">Sunday, 15 March</div></div>
+                  <div class="pcrit" onclick="pS('detail')">
+                    <div class="pcrit-bar"><span>🚨 AlertAU — Emergency Warning</span><time>now</time></div>
+                    <div class="pcrit-body">
+                      <div class="pcrit-title">🔥 EVACUATE NOW — Gippsland Fire</div>
+                      <div class="pcrit-why">
+                        <div class="pcrit-why-lbl">⚠ Why you're at risk</div>
+                        <div class="pcrit-why-txt">Fire is 12km SE. Wind blowing directly toward your address at 35km/h. Estimated threat time: under 20 minutes.</div>
+                      </div>
+                      <div class="pcrit-acts"><div class="pcrit-br">📞 Call 000</div><div class="pcrit-bg">Safety plan →</div></div>
+                    </div>
+                  </div>
+                  <div class="pstack"><div class="pstack-inner">
+                    <span style="font-size:16px">🌊</span>
+                    <div style="flex:1"><div style="font-size:10px;font-weight:700;color:#fff">Flood — Murray River · 18km</div><div class="pstack-why">Your street is in Zone B — below flood line</div></div>
+                    <span style="font-size:9px;color:rgba(255,255,255,.4)">2m</span>
+                  </div></div>
+                  <div style="text-align:center;padding:14px 0 0;font-size:10px;color:rgba(255,255,255,.3)">Tap for full safety instructions ↑</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MAP SCREEN -->
+            <div class="pscr off" id="ps-map">
+              <div class="psb"><span class="psb-t">9:41</span><span class="psb-i">●●● WiFi 🔋</span></div>
+              <div class="phd"><div class="phd-n">Alert<sup>AU</sup></div><div class="phd-live"><div class="phd-dot"></div>LIVE</div></div>
+              <div class="pmap-a">
+                <canvas id="phoneCanvas"></canvas>
+                <div class="ppill" onclick="pS('detail')"><div class="ppill-icon">🔥</div><div><div class="ppill-title">HIGH RISK — 42km away</div><div class="ppill-sub">Wind toward you · Tap for WHY</div></div><div class="ppill-arr">›</div></div>
+                <button class="pfab" onclick="pS('list')">☰</button>
+              </div>
+              <div class="ptab-bar">
+                <button class="ptab-b on" onclick="pS('map')"><div class="ptab-icon">🗺️</div><div class="ptab-lbl">Map</div></button>
+                <button class="ptab-b" onclick="pS('list')"><div class="ptab-icon">⚠️</div><div class="ptab-lbl">Alerts</div></button>
+                <button class="ptab-b" onclick="pS('detail')"><div class="ptab-icon">🛡️</div><div class="ptab-lbl">Safety</div></button>
+              </div>
+            </div>
+
+            <!-- LIST SCREEN -->
+            <div class="pscr off" id="ps-list">
+              <div class="plist-hdr"><div class="plist-title">Your Alerts</div><div class="plist-sub">Melbourne · 6 nearby incidents</div></div>
+              <div class="plist-stats">
+                <div class="pmst"><div class="pmst-n" style="color:var(--red)">2</div><div class="pmst-l">High</div></div>
+                <div class="pmst"><div class="pmst-n" style="color:var(--amber)">2</div><div class="pmst-l">Med</div></div>
+                <div class="pmst"><div class="pmst-n" style="color:var(--teal)">2</div><div class="pmst-l">Low</div></div>
+              </div>
+              <div class="pinc-scroll">
+                <div class="pinc" style="border-left-color:#e74c3c" onclick="pS('detail')"><div class="pinc-top"><div class="pinc-name">🔥 Gippsland Complex Fire</div><div class="pinc-dot" style="background:rgba(184,48,37,.15);color:var(--red)">H</div></div><div class="pinc-meta">42 km SE · 3,400ha · Total fire ban</div><div class="pinc-why">Wind blowing toward your address at 35km/h</div></div>
+                <div class="pinc" style="border-left-color:#2980b9" onclick="pS('detail')"><div class="pinc-top"><div class="pinc-name">🌊 Murray River Flooding</div><div class="pinc-dot" style="background:rgba(184,48,37,.15);color:var(--red)">H</div></div><div class="pinc-meta">18 km N · SES evacuation order</div><div class="pinc-why">Your street is below the 12m flood line</div></div>
+                <div class="pinc" style="border-left-color:#8e44ad" onclick="pS('detail')"><div class="pinc-top"><div class="pinc-name">⛈️ Severe Thunderstorm</div><div class="pinc-dot" style="background:rgba(168,92,10,.15);color:var(--amber)">M</div></div><div class="pinc-meta">31 km E · 90km/h gusts</div><div class="pinc-why">Storm moving toward your area at 40km/h</div></div>
+                <div class="pinc" style="border-left-color:#d35400" onclick="pS('detail')"><div class="pinc-top"><div class="pinc-name">🌡️ Wimmera Heatwave</div><div class="pinc-dot" style="background:rgba(168,92,10,.15);color:var(--amber)">M</div></div><div class="pinc-meta">85 km NW · 44°C tomorrow</div><div class="pinc-why">Nearest cooling centre: your library, 2.3km</div></div>
+              </div>
+              <div class="ptab-bar">
+                <button class="ptab-b" onclick="pS('map')"><div class="ptab-icon">🗺️</div><div class="ptab-lbl">Map</div></button>
+                <button class="ptab-b on"><div class="ptab-icon">⚠️</div><div class="ptab-lbl">Alerts</div></button>
+                <button class="ptab-b" onclick="pS('detail')"><div class="ptab-icon">🛡️</div><div class="ptab-lbl">Safety</div></button>
+              </div>
+            </div>
+
+            <!-- DETAIL SCREEN -->
+            <div class="pscr off" id="ps-detail">
+              <div class="pdet-hdr"><div class="pdet-back" onclick="pS('list')">← Back to alerts</div><div class="pdet-title">🔥 Gippsland Complex Fire</div></div>
+              <div class="pdet-body">
+                <div class="prisk" style="background:rgba(184,48,37,.1);border:1.5px solid rgba(184,48,37,.25)">
+                  <div class="prisk-icon">🚨</div>
+                  <div><div class="prisk-title" style="color:var(--red)">HIGH RISK — 42km from your location</div><div class="prisk-sub" style="color:var(--red)">Wind-driven · 3,400ha · Moving NE at 35km/h</div></div>
+                </div>
+                <div class="pwhy">
+                  <div class="pwhy-lbl">⚠ Why you are at risk</div>
+                  <div class="pwhy-txt">The fire is 42km south-east of your address. The north-east wind at 35km/h is blowing directly toward you. Your property is in Watch and Act zone. If the wind strengthens, you may need to evacuate with under 30 minutes notice.</div>
+                </div>
+                <div class="pai-card">
+                  <div class="pai-hdr"><span>🤖 What you should do</span><div class="pai-badge">AI Brief</div></div>
+                  <div class="pai-txt" id="pAiTxt"></div>
+                  <div id="pAiLd" style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="display:flex;gap:2px"><i style="width:5px;height:5px;border-radius:50%;background:var(--teal);display:inline-block;animation:dp 1.2s infinite"></i><i style="width:5px;height:5px;border-radius:50%;background:var(--teal);display:inline-block;animation:dp 1.2s .2s infinite"></i><i style="width:5px;height:5px;border-radius:50%;background:var(--teal);display:inline-block;animation:dp 1.2s .4s infinite"></i></span><span style="font-size:11px;color:var(--text3)">Generating instructions…</span></div>
+                </div>
+              </div>
+              <div class="pfixed"><button class="pfixed-btn red">📞 Call 000</button><button class="pfixed-btn out" onclick="pS('map')">View on map</button></div>
+            </div>
+
+          </div>
+        </div>
+        <div class="ptabs-outer">
+          <button class="pto on" id="pto-lock" onclick="pS('lock')">🚨 Alert</button>
+          <button class="pto" id="pto-map" onclick="pS('map')">🗺️ Map</button>
+          <button class="pto" id="pto-list" onclick="pS('list')">☰ List</button>
+          <button class="pto" id="pto-detail" onclick="pS('detail')">🛡️ WHY</button>
+        </div>
+      </div>
+      <div class="mob-feats">
+        <div class="mf why-feat" onclick="pS('detail')"><span class="mf-icon">💬</span><h4>Plain English, always</h4><p>No fire behaviour indices. No jargon. Just "the wind is blowing toward your house and here's what you need to do right now."</p></div>
+        <div class="mf" onclick="pS('list')"><span class="mf-icon">📍</span><h4>Nearest resource, every time</h4><p>Not just "go to a shelter." Your nearest cooling centre, evacuation route, SES office — calculated from your exact GPS location.</p></div>
+        <div class="mf" onclick="pS('map')"><span class="mf-icon">🔕</span><h4>Only alerts that matter to you</h4><p>No broadcast spam. If a fire is 400km away with no wind toward you, you won't hear about it. Your phone is only interrupted when it genuinely matters.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACCESSIBILITY -->
+<section class="section alt" aria-labelledby="ac-h">
+  <div class="si">
+    <div class="eyebrow" aria-hidden="true">Designed For Everyone</div>
+    <h2 id="ac-h">The people who need this most are often the hardest to reach.</h2>
+    <p class="lead">Elderly Australians, CALD communities, and people with disabilities are disproportionately affected by emergencies — and disproportionately underserved by existing alert systems.</p>
+    <div class="ac-grid">
+      <div class="ac reveal"><span class="ac-icon">👴</span><h3>Designed for elderly users</h3><p>Large text, plain English, high contrast, and single-tap actions. The "why" explanation is written to be understood by someone under stress, at any age. No technical knowledge required.</p></div>
+      <div class="ac reveal"><span class="ac-icon">🌏</span><h3>Multilingual — instantly</h3><p>The AI safety brief can be generated in any language in seconds. CALD communities who don't receive emergency alerts in their first language are often the most vulnerable — this closes that gap.</p></div>
+      <div class="ac reveal"><span class="ac-icon">♿</span><h3>Accessible by design</h3><p>Screen reader support, keyboard navigation, WCAG AA contrast ratios, and reduced-motion options. Accessibility is baked in from the start — not patched on at the end.</p></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer role="contentinfo">
+  <div class="fi">
+    <div>
+      <div class="flogo"><div class="flogo-i">🛡️</div><div><strong>AlertAU</strong><span>Personalised Emergency Intelligence</span></div></div>
+      <p class="fdesc">Built for social impact. Every Australian deserves to know not just <em>that</em> there's an emergency nearby — but exactly <em>why it affects them</em> and precisely what to do about it.</p>
+    </div>
+    <div class="fr">
+      <h4>Built with</h4>
+      <div class="ftags"><span class="ftag">NASA FIRMS</span><span class="ftag">OpenWeatherMap</span><span class="ftag">OpenAI GPT-4o</span><span class="ftag">React Native</span><span class="ftag">Australia</span><span class="ftag">EU Ready</span><span class="ftag">Open Data</span><span class="ftag">WCAG AA</span></div>
+    </div>
+  </div>
+  <div class="fbot"><span>© 2025 AlertAU — Hackathon MVP</span><span>You know why. You know what to do.</span></div>
+</footer>
+
+<script>
+const INC=[
+  {id:1,name:"Gippsland Complex Fire",type:"fire",risk:"HIGH",x:.74,y:.52,r:50,dist:"42 km SE",info:"Wind-driven · 3,400ha · Total fire ban",why:"The fire is 42km south-east. Wind at 35km/h is blowing directly toward your address. Your property is in Watch and Act zone. If the wind strengthens, threat time drops to under 20 minutes.",ai:"Leave immediately if you are in Zones A or B — do not wait to see flames or smoke. Use Princes Highway West as your evacuation route and avoid Traralgon Road. Turn off evaporative cooling and close all windows to stop ember entry. Tune to ABC Emergency 774 AM for live zone updates. Call Triple Zero 000 if you are in immediate danger."},
+  {id:2,name:"Murray River Flooding",type:"flood",risk:"HIGH",x:.27,y:.22,r:44,dist:"18 km N",info:"SES evacuation order · Flood peak 6am",why:"Your property is 18km from the flood zone. Your street elevation is below the projected 12-metre flood line. If the levee is breached, inundation could reach your area within 4 hours.",ai:"Do not walk, drive, or swim through floodwater — even 15cm of moving water can knock you off your feet. Move valuables to the highest floor right now. Call SES on 132 500 for sandbagging help. Avoid Swan Hill Bridge — the road is submerged. Check bom.gov.au every 30 minutes for updated river heights."},
+  {id:3,name:"Severe Thunderstorm Warning",type:"storm",risk:"MED",x:.61,y:.70,r:65,dist:"31 km E",info:"90km/h gusts · Large hail · Moving NW",why:"The storm is 31km east and moving north-west at 40km/h — it will reach your area in approximately 45 minutes. Your suburb has had storm damage incidents in the past 2 years.",ai:"Go indoors and stay away from windows and glass doors. Bring inside any loose outdoor items — chairs, umbrellas, trampolines are dangerous projectiles. If driving, pull over safely away from trees. Do not touch electrical switchboards. Check BOM radar at bom.gov.au."},
+  {id:4,name:"Wimmera Heatwave",type:"heat",risk:"MED",x:.17,y:.36,r:80,dist:"85 km NW",info:"Day 3 of heatwave · 44°C tomorrow",why:"While the heatwave is centred 85km away, your suburb will reach 39°C tomorrow. Your nearest registered cooling centre — Swan Hill Library — is 2.3km from your address.",ai:"Stay indoors in air conditioning between 10am and 5pm. Drink water every 30 minutes even if not thirsty. Never leave children, elderly people, or pets in a parked car. Check on elderly neighbours at least twice today. Cooling centres are open at Swan Hill Library and Horsham Aquatic Centre — both are free."},
+  {id:5,name:"Dandenong Ranges Spotfire",type:"fire",risk:"LOW",x:.65,y:.56,r:22,dist:"28 km E",info:"Contained · 40ha · Crews on scene",why:"This fire is currently contained and 28km east. Wind direction is not toward your location today. This is a monitoring alert only — no action required unless conditions change.",ai:"The fire is currently contained. Monitor the CFA website at cfa.vic.gov.au and have your household emergency kit ready. Keep windows closed to limit smoke entry. If the alert level rises to Emergency Warning, leave immediately."},
+  {id:6,name:"East Gippsland Coastal Flood",type:"flood",risk:"LOW",x:.86,y:.67,r:20,dist:"112 km E",info:"Minor tidal flooding · Coastal roads affected",why:"This flood is 112km from your location and poses no direct threat. Some coastal access roads in East Gippsland are affected if you are planning travel to that region.",ai:"Avoid Metung Road and Raymond Island Ferry Terminal which have minor surface flooding. Do not drive through water even if it looks shallow. Call SES on 132 500 if your property is affected. Check vicroads.vic.gov.au for current road conditions before travelling east."},
+];
+const TYPES={fire:{color:"#e74c3c",icon:"🔥",label:"Bushfire"},flood:{color:"#2980b9",icon:"🌊",label:"Flood"},storm:{color:"#8e44ad",icon:"⛈️",label:"Storm"},heat:{color:"#d35400",icon:"🌡️",label:"Heatwave"}};
+const RS={HIGH:{bg:"rgba(184,48,37,.12)",c:"#b83025",b:"rgba(184,48,37,.3)"},MED:{bg:"rgba(168,92,10,.12)",c:"#a85c0a",b:"rgba(168,92,10,.3)"},LOW:{bg:"rgba(0,109,96,.1)",c:"#006d60",b:"rgba(0,109,96,.25)"}};
+
+function drawBase(ctx,W,H){ctx.fillStyle='#ddeaf5';ctx.fillRect(0,0,W,H);ctx.strokeStyle='rgba(12,29,53,.055)';ctx.lineWidth=1;for(let x=0;x<W;x+=44){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=44){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}[['#c8d8a8',.5,.5,240,190,.1],['#d4c89a',.2,.7,150,110,.4],['#bfd4a4',.75,.3,170,120,-.2],['#e8d9b0',.8,.75,130,90,.3],['#c4d8e8',.1,.2,95,75,0]].forEach(([col,cx,cy,rx,ry,rot])=>{ctx.save();ctx.translate(cx*W,cy*H);ctx.rotate(rot);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore()});ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H*.5);ctx.lineTo(W,H*.5);ctx.stroke();ctx.beginPath();ctx.moveTo(W*.5,0);ctx.lineTo(W*.5,H);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,H*.25);ctx.bezierCurveTo(W*.3,H*.22,W*.6,H*.28,W,H*.26);ctx.stroke();ctx.beginPath();ctx.arc(W*.5,H*.5,4,0,Math.PI*2);ctx.fillStyle='#0c1d35';ctx.fill();ctx.fillStyle='rgba(12,29,53,.65)';ctx.font='bold 11px Sora,sans-serif';ctx.textAlign='center';ctx.fillText('Melbourne',W*.5,H*.5-12)}
+function drawMarkers(ctx,W,H,incs,selId,filter,t){incs.forEach(inc=>{const vis=filter==='all'||inc.type===filter,x=inc.x*W,y=inc.y*H,col=TYPES[inc.type].color,alpha=vis?1:.1,isSel=inc.id===selId;ctx.save();ctx.globalAlpha=alpha*.18;ctx.beginPath();ctx.arc(x,y,inc.r*.85+(Math.sin(t/900+inc.id*1.3)*.5+.5)*7,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();ctx.globalAlpha=alpha;const g=ctx.createRadialGradient(x,y,0,x,y,inc.r*.75);g.addColorStop(0,col+'28');g.addColorStop(1,col+'00');ctx.beginPath();ctx.arc(x,y,inc.r*.75,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();if(isSel){ctx.beginPath();ctx.arc(x,y,15,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=3;ctx.globalAlpha=alpha*.45;ctx.stroke();ctx.globalAlpha=alpha}ctx.beginPath();ctx.arc(x,y+2,isSel?11:8,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.15)';ctx.fill();ctx.beginPath();ctx.arc(x,y,isSel?10:7,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.beginPath();ctx.arc(x,y,isSel?10:7,0,Math.PI*2);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.restore()})}
+
+(function(){const c=document.getElementById('demoCanvas');if(!c)return;const ctx=c.getContext('2d');function r(){const p=c.parentElement;c.width=p.clientWidth;c.height=p.clientHeight}r();window.addEventListener('resize',r);let selId=null,filter='all',aiT=null,t=0;(function loop(){drawBase(ctx,c.width,c.height);drawMarkers(ctx,c.width,c.height,INC,selId,filter,t);t+=16;requestAnimationFrame(loop)})();c.style.cursor='pointer';c.addEventListener('click',e=>{const r2=c.getBoundingClientRect(),mx=(e.clientX-r2.left)*(c.width/r2.width),my=(e.clientY-r2.top)*(c.height/r2.height);let hit=null,best=999;INC.forEach(i=>{if(filter!=='all'&&i.type!==filter)return;const d=Math.hypot(mx-i.x*c.width,my-i.y*c.height);if(d<18&&d<best){best=d;hit=i}});if(hit){selId=hit.id;renderList();showDetail(hit)}});
+const FTABS=[{k:'all',l:'All'},{k:'fire',l:'🔥 Fire'},{k:'flood',l:'🌊 Flood'},{k:'storm',l:'⛈ Storm'},{k:'heat',l:'🌡 Heat'}];
+function renderFilters(){document.getElementById('filterBar').innerHTML=FTABS.map(f=>`<button class="fchip${filter===f.k?' on':''}" onclick="window._df('${f.k}')">${f.l}</button>`).join('')}
+window._df=function(f){filter=f;renderFilters();renderList()}
+function renderList(){const sorted=[...INC].filter(i=>filter==='all'||i.type===filter).sort((a,b)=>({HIGH:0,MED:1,LOW:2}[a.risk]-{HIGH:0,MED:1,LOW:2}[b.risk]));document.getElementById('incList').innerHTML=sorted.map(i=>{const ti=TYPES[i.type],ri=RS[i.risk];return`<div class="inc-card${i.id===selId?' sel':''}" style="border-left-color:${ti.color}" onclick="window._ds(${i.id})" tabindex="0" role="listitem" onkeydown="if(event.key==='Enter')window._ds(${i.id})"><div class="inc-top"><div class="inc-name">${ti.icon} ${i.name}</div><div class="rbadge" style="background:${ri.bg};color:${ri.c};border:1px solid ${ri.b}">${i.risk}</div></div><div class="inc-meta">${i.dist} · ${i.info}</div></div>`}).join('')}
+window._ds=function(id){selId=id;renderList();showDetail(INC.find(i=>i.id===id))}
+function showDetail(inc){const ti=TYPES[inc.type],ri=RS[inc.risk];document.getElementById('detailPanel').innerHTML=`<div class="dp-inner"><div class="dp-head"><span class="dp-icon">${ti.icon}</span><div class="dp-name">${inc.name}</div><div class="dp-risk" style="background:${ri.bg};color:${ri.c};border:1px solid ${ri.b}">${inc.risk}</div><div class="ai-tag">AI</div></div><div class="dp-why"><div class="dp-why-lbl">⚠ Why you are at risk</div><div class="dp-why-txt">${inc.why}</div></div><div class="loader" id="dl"><span><i></i><i></i><i></i></span><p>Generating your safety instructions…</p></div><div class="dp-ai" id="dat" style="display:none"></div><div class="dp-btns"><button class="dp-btn danger">📞 Call 000</button><button class="dp-btn">Evacuation route</button></div></div>`;clearTimeout(aiT);aiT=setTimeout(()=>{const ld=document.getElementById('dl'),out=document.getElementById('dat');if(!ld||!out)return;ld.style.display='none';out.style.display='block';let i=0;const iv=setInterval(()=>{out.textContent+=inc.ai[i++];if(i>=inc.ai.length)clearInterval(iv)},10)},750)}
+renderFilters();renderList()})();
+
+(function(){const c=document.getElementById('phoneCanvas');if(!c)return;const ctx=c.getContext('2d');function r(){const p=c.parentElement;c.width=p.clientWidth;c.height=p.clientHeight}r();let t=0;(function loop(){drawBase(ctx,c.width,c.height);drawMarkers(ctx,c.width,c.height,INC,1,'all',t);t+=16;requestAnimationFrame(loop)})()})();
+
+const PSCREENS=['lock','map','list','detail'];let aiPhDone=false;
+function pS(name){PSCREENS.forEach(s=>{const el=document.getElementById('ps-'+s);if(el)el.classList.toggle('off',s!==name);const to=document.getElementById('pto-'+s);if(to)to.classList.toggle('on',s===name);const mf=document.getElementById('mf-'+s);if(mf)mf.classList.toggle('active',s===name)});if(name==='detail'&&!aiPhDone){aiPhDone=true;const out=document.getElementById('pAiTxt'),ld=document.getElementById('pAiLd');const txt="Prepare to evacuate but do not leave yet — you have time to pack essential items. Gather your emergency kit: medications, ID documents, phone charger, water, and valuables. Your nearest evacuation route is Princes Highway West — program it into your phone now. Tune to ABC Emergency 774 AM. If wind speed increases or you see smoke, leave immediately without delay.";setTimeout(()=>{if(ld)ld.style.display='none';if(out){out.style.display='block';let i=0;const iv=setInterval(()=>{out.textContent+=txt[i++];if(i>=txt.length)clearInterval(iv)},14)}},900)}}
+
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}})},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

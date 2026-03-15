@@ -1,0 +1,103 @@
+# Where to Put Your API Keys
+# ============================================================
+# Emergency Alert Platform — API Key Setup Guide
+# ============================================================
+
+## The 3 API keys you need
+
+| Key               | Service         | Cost       | Sign-up URL                                      |
+|-------------------|----------------|------------|--------------------------------------------------|
+| NASA_FIRMS_KEY    | NASA FIRMS     | FREE       | https://firms.modaps.eosdis.nasa.gov/api/        |
+| OPENWEATHER_KEY   | OpenWeatherMap | FREE tier  | https://openweathermap.org/api                   |
+| OPENAI_KEY        | OpenAI GPT-4o  | Pay as go  | https://platform.openai.com/api-keys             |
+
+
+## WHERE exactly to put them
+# ============================================================
+
+# STEP 1 — In the React app (your developers' codebase)
+# -------------------------------------------------------
+# Find the file: EmergencyAlertApp/.env
+# (copy .env.example to .env first if it doesn't exist)
+#
+# Open it and paste your keys like this:
+
+NASA_FIRMS_KEY=abc123yourkeyhere
+OPENWEATHER_KEY=xyz789yourkeyhere
+OPENAI_KEY=sk-proj-youropenaikeyhere
+API_BASE_URL=http://localhost:3001
+
+
+# STEP 2 — In the website demo (index.html)
+# -------------------------------------------------------
+# The website demo (index.html) runs entirely in the browser.
+# It uses MOCK DATA by default — no API keys needed for the demo.
+#
+# If you want the website demo to call REAL OpenAI for AI summaries:
+# Open index.html in VS Code.
+# Find this line near the top of the <script> section:
+#
+#   const OPENAI_KEY = null; // replace null with your key
+#
+# Change it to:
+#
+#   const OPENAI_KEY = "sk-proj-yourkeyhere";
+#
+# ⚠️  WARNING: Do NOT put your OpenAI key in a public website
+#    if real users will visit it — they could steal it.
+#    For a hackathon demo this is fine.
+#    For a live production site, use a backend proxy instead.
+
+
+# STEP 3 — Switching from mock data to live data
+# -------------------------------------------------------
+# In EmergencyAlertApp/src/services/aggregator.js
+# Find this line:
+#
+#   const USE_MOCK_DATA = true;
+#
+# Change true to false:
+#
+#   const USE_MOCK_DATA = false;
+#
+# Now the app will call the real NASA and OpenWeatherMap APIs.
+
+
+## NEVER do these things with API keys
+# ============================================================
+# ❌ Never commit your .env file to GitHub
+# ❌ Never paste a key directly into App.js or any .js file you commit
+# ❌ Never share keys in Slack, email, or screenshots
+# ❌ Never put your OpenAI key in a public-facing website in production
+#
+# The .gitignore file in your project already blocks .env from GitHub.
+# Keep it that way.
+
+
+## How to get each key (step by step)
+# ============================================================
+
+# NASA FIRMS (fire data — completely free)
+# 1. Go to https://firms.modaps.eosdis.nasa.gov/api/
+# 2. Click "Get a MAP_KEY"
+# 3. Fill in your name and email
+# 4. You receive a key by email within minutes
+# 5. Paste it as NASA_FIRMS_KEY in your .env file
+
+# OpenWeatherMap (weather alerts — free tier)
+# 1. Go to https://openweathermap.org/api
+# 2. Click "Sign Up" in the top right
+# 3. After signing up, go to your account → API Keys tab
+# 4. Copy the "Default" key shown there
+# 5. Paste it as OPENWEATHER_KEY in your .env file
+# Note: The key takes up to 2 hours to activate after sign-up
+
+# OpenAI (AI summaries — pay as you go)
+# 1. Go to https://platform.openai.com/api-keys
+# 2. Sign in or create an account
+# 3. Click "Create new secret key"
+# 4. Give it a name like "AlertAU hackathon"
+# 5. Copy the key immediately — you can only see it once
+# 6. Paste it as OPENAI_KEY in your .env file
+# Cost: GPT-4o-mini costs about $0.001 per safety summary
+#       A full day of demo use costs less than $1

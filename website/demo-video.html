@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlertAU — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Sora',sans-serif}
+
+/* ── STAGE ── */
+#stage{width:100%;height:100%;position:relative;background:#000}
+
+/* ── SCENE LAYERS ── */
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .8s ease;pointer-events:none}
+.scene.active{opacity:1;pointer-events:all}
+
+/* ── TITLE CARD ── */
+#s-title{background:#0c1d35;flex-direction:column;gap:0;text-align:center}
+.title-eyebrow{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4ade80;margin-bottom:24px;opacity:0;animation:none}
+.title-h{font-size:clamp(32px,5vw,72px);font-weight:900;color:#fff;line-height:1.08;letter-spacing:-2px;margin-bottom:20px;opacity:0}
+.title-h span{color:#e74c3c}
+.title-sub{font-size:clamp(14px,2vw,22px);color:rgba(255,255,255,.55);font-weight:300;line-height:1.6;max-width:680px;opacity:0}
+.title-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.12}
+.title-rings svg{width:min(700px,90vw);height:min(700px,90vh)}
+
+/* ── PROBLEM CARD ── */
+#s-problem{background:#0c1d35;flex-direction:column;padding:60px 40px;text-align:center}
+.prob-stat{font-size:clamp(80px,15vw,160px);font-weight:900;font-family:'DM Mono',monospace;color:#e74c3c;line-height:1;opacity:0}
+.prob-label{font-size:clamp(16px,2.5vw,28px);color:rgba(255,255,255,.7);font-weight:300;margin-top:16px;max-width:600px;text-align:center;line-height:1.6;opacity:0}
+.prob-quote{font-size:clamp(13px,1.8vw,20px);color:rgba(255,255,255,.35);font-style:italic;margin-top:20px;max-width:700px;opacity:0;line-height:1.7}
+.prob-quote strong{color:rgba(255,255,255,.55);font-style:normal}
+
+/* ── THE OLD WAY ── */
+#s-oldway{background:#0f0f0f;flex-direction:column;gap:0;padding:60px 40px;align-items:center}
+.oldway-label{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:32px;opacity:0}
+.oldway-phone{width:min(340px,85vw);background:#1a1a1a;border-radius:36px;border:8px solid #2a2a2a;box-shadow:0 40px 100px rgba(0,0,0,.8);overflow:hidden;opacity:0;transform:translateY(30px)}
+.op-statusbar{background:#000;padding:14px 18px 8px;display:flex;justify-content:space-between}
+.op-sb-t{font-size:13px;font-weight:700;color:#fff;font-family:'DM Mono',monospace}
+.op-sb-i{font-size:10px;color:rgba(255,255,255,.6)}
+.op-notif{background:#1c1c1e;margin:8px;border-radius:14px;padding:14px;opacity:0;transform:translateY(-20px)}
+.op-notif-app{font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px}
+.op-notif-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.op-notif-body{font-size:13px;color:rgba(255,255,255,.55);line-height:1.5}
+.oldway-verdict{margin-top:32px;font-size:clamp(14px,2vw,22px);color:rgba(255,255,255,.35);font-weight:300;opacity:0;text-align:center;line-height:1.6}
+.oldway-verdict strong{color:#e74c3c}
+
+/* ── THE NEW WAY ── */
+#s-newway{background:#0c1d35;flex-direction:column;padding:60px 40px;align-items:center}
+.newway-label{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4ade80;margin-bottom:32px;opacity:0}
+.newway-phone{width:min(340px,85vw);background:#0a0f1a;border-radius:36px;border:8px solid #1e2840;box-shadow:0 40px 100px rgba(0,0,0,.8);overflow:hidden;opacity:0;transform:translateY(30px)}
+.np-statusbar{background:#000;padding:14px 18px 8px;display:flex;justify-content:space-between}
+.np-sb-t{font-size:13px;font-weight:700;color:#fff;font-family:'DM Mono',monospace}
+.np-sb-i{font-size:10px;color:rgba(255,255,255,.6)}
+.np-notif{margin:8px;border-radius:16px;overflow:hidden;opacity:0;transform:translateY(-20px)}
+.np-notif-bar{background:#b83025;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.np-notif-bar span{font-size:10px;font-weight:800;color:#fff;letter-spacing:1.5px;text-transform:uppercase;flex:1}
+.np-notif-bar time{font-size:10px;color:rgba(255,255,255,.7)}
+.np-notif-body{background:rgba(8,5,4,.95);padding:14px}
+.np-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.3}
+/* ★ THE WHY BOX ★ */
+.np-why{background:rgba(184,48,37,.18);border:1.5px solid rgba(184,48,37,.45);border-radius:10px;padding:10px 12px;margin-bottom:10px;opacity:0}
+.np-why-lbl{font-size:9px;font-weight:800;color:#f87171;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.np-why-txt{font-size:12px;color:rgba(255,255,255,.9);font-weight:600;line-height:1.6}
+.np-acts{display:flex;gap:8px;opacity:0}
+.np-btn-r{flex:1;background:#b83025;border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:800;color:#fff}
+.np-btn-g{flex:1;background:rgba(255,255,255,.1);border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.15)}
+.newway-tagline{margin-top:32px;font-size:clamp(14px,2vw,22px);color:rgba(255,255,255,.7);font-weight:300;opacity:0;text-align:center;line-height:1.6}
+.newway-tagline strong{color:#4ade80}
+
+/* ── THREE PEOPLE SCENE ── */
+#s-three{background:#0c1d35;flex-direction:column;padding:48px 40px;align-items:center}
+.three-title{font-size:clamp(20px,3vw,40px);font-weight:900;color:#fff;text-align:center;line-height:1.15;margin-bottom:8px;letter-spacing:-1px;opacity:0}
+.three-sub{font-size:clamp(13px,1.5vw,18px);color:rgba(255,255,255,.45);text-align:center;margin-bottom:40px;font-weight:300;opacity:0}
+.three-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;max-width:960px}
+.person-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;opacity:0;transform:translateY(24px)}
+.pc-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pc-avatar{font-size:28px;flex-shrink:0}
+.pc-name{font-size:14px;font-weight:800;color:#fff}
+.pc-loc{font-size:12px;color:rgba(255,255,255,.4);margin-top:1px}
+.pc-risk{font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;letter-spacing:.8px;text-transform:uppercase;margin-left:auto;flex-shrink:0}
+.pc-who{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:12px;line-height:1.5}
+.pc-why{border-radius:10px;padding:10px 12px;margin-bottom:0}
+.pc-why-lbl{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.pc-why-txt{font-size:12px;font-weight:600;line-height:1.6}
+.pc-action{font-size:11px;color:rgba(255,255,255,.35);line-height:1.6;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;margin-top:10px}
+
+/* ── THE KEY LINE SCENE ── */
+#s-keyline{background:#0c1d35;flex-direction:column;text-align:center;padding:60px 40px}
+.kl-pre{font-size:clamp(14px,2vw,22px);color:rgba(255,255,255,.4);font-weight:300;margin-bottom:20px;opacity:0}
+.kl-main{font-size:clamp(24px,4.5vw,62px);font-weight:900;color:#fff;line-height:1.08;letter-spacing:-1.5px;margin-bottom:20px;opacity:0}
+.kl-main em{font-style:normal;color:#4ade80}
+.kl-post{font-size:clamp(14px,2vw,22px);color:rgba(255,255,255,.45);font-weight:300;opacity:0;max-width:700px;line-height:1.7}
+
+/* ── MAP DEMO SCENE ── */
+#s-mapdemo{background:#0c1d35;padding:40px;align-items:stretch;justify-content:stretch;flex-direction:column}
+.md-label{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);text-align:center;margin-bottom:20px;opacity:0}
+.md-window{flex:1;background:#f4f2ec;border-radius:16px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.6);display:flex;flex-direction:column;opacity:0;transform:scale(.97)}
+.md-chrome{background:#0c1d35;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.md-dots{display:flex;gap:6px}
+.md-dot{width:11px;height:11px;border-radius:50%}
+.md-url{background:rgba(255,255,255,.1);border-radius:5px;padding:4px 14px;font-size:11px;color:rgba(255,255,255,.45);font-family:'DM Mono',monospace}
+.md-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#4ade80}
+.md-live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.5)}50%{box-shadow:0 0 0 5px rgba(74,222,128,0)}}
+.md-body{flex:1;display:grid;grid-template-columns:1fr 320px;min-height:0}
+.md-map{position:relative;overflow:hidden;background:#ddeaf5}
+#demoCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.md-map-top{position:absolute;top:0;left:0;right:0;padding:14px 16px;background:linear-gradient(to bottom,rgba(12,29,53,.88) 55%,transparent);display:flex;align-items:center;justify-content:space-between;z-index:10}
+.md-map-name{font-size:16px;font-weight:900;color:#fff}
+.md-map-name sup{font-size:8px;color:#e74c3c}
+.md-map-badge{display:flex;align-items:center;gap:5px;background:rgba(12,29,53,.7);border:1px solid rgba(255,255,255,.2);padding:5px 11px;border-radius:100px;font-size:10px;font-weight:700;color:#4ade80}
+.md-map-leg{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(to top,rgba(12,29,53,.8) 55%,transparent);display:flex;gap:14px;z-index:10;flex-wrap:wrap}
+.md-leg{display:flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.8);font-weight:500}
+.md-legdot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.4)}
+/* Sidebar */
+.md-sb{background:#fff;border-left:1.5px solid #d5d0c6;display:flex;flex-direction:column;overflow:hidden}
+.md-sb-top{padding:12px 12px 0;flex-shrink:0}
+.md-sb-ey{font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#647188;margin-bottom:8px}
+.md-sb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
+.md-stat{background:#f4f2ec;border-radius:7px;padding:7px 5px;text-align:center;border:1px solid #d5d0c6}
+.md-stat-n{font-size:18px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;margin-bottom:1px}
+.md-stat-l{font-size:9px;color:#647188;font-weight:600}
+.md-inc-list{flex:1;overflow-y:auto;padding:0 8px 8px}
+.md-inc-list::-webkit-scrollbar{width:3px}
+.md-inc-list::-webkit-scrollbar-thumb{background:#d5d0c6;border-radius:2px}
+.md-inc{padding:10px;border-radius:8px;border:1.5px solid #d5d0c6;background:#fff;margin-bottom:6px;cursor:pointer;transition:all .15s;border-left-width:3px}
+.md-inc.active-inc{border-color:#0c1d35;background:rgba(12,29,53,.04)}
+.md-inc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:3px}
+.md-inc-name{font-size:11px;font-weight:700;color:#0c1d35;line-height:1.3;flex:1}
+.md-risk{font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;white-space:nowrap;letter-spacing:.5px}
+.md-inc-meta{font-size:10px;color:#647188}
+/* Detail panel with WHY */
+.md-detail{border-top:1.5px solid #d5d0c6;background:#f4f2ec;flex-shrink:0;overflow:hidden;max-height:0;transition:max-height .6s cubic-bezier(0.4,0,0.2,1)}
+.md-detail.open{max-height:280px}
+.md-det-inner{padding:12px}
+.md-det-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.md-det-icon{font-size:20px}
+.md-det-name{font-size:12px;font-weight:700;color:#0c1d35;flex:1}
+.md-det-risk{font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px}
+.md-ai-tag{font-size:9px;font-weight:700;background:rgba(0,109,96,.1);color:#006d60;border:1px solid rgba(0,109,96,.25);padding:2px 8px;border-radius:100px}
+/* ★ THE WHY BOX in demo ★ */
+.md-why-box{background:rgba(184,48,37,.07);border:1.5px solid rgba(184,48,37,.22);border-radius:8px;padding:9px 11px;margin-bottom:7px;opacity:0;transform:translateY(8px);transition:all .5s .3s}
+.md-why-box.show{opacity:1;transform:none}
+.md-why-lbl{font-size:8px;font-weight:800;color:#b83025;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.md-why-txt{font-size:11px;color:#181824;font-weight:700;line-height:1.6}
+.md-ai-out{font-size:11px;color:#374155;line-height:1.7;opacity:0;transition:opacity .5s .6s}
+.md-ai-out.show{opacity:1}
+.md-det-btns{display:flex;gap:6px;margin-top:8px;opacity:0;transition:opacity .4s .8s}
+.md-det-btns.show{opacity:1}
+.md-btn{flex:1;padding:7px 8px;border-radius:7px;border:1.5px solid #d5d0c6;background:#fff;color:#0c1d35;font-size:10px;font-weight:700;cursor:pointer;font-family:'Sora',sans-serif;text-align:center}
+.md-btn.red{background:#b83025;border-color:#b83025;color:#fff}
+
+/* ── CLOSE SCENE ── */
+#s-close{background:#0c1d35;flex-direction:column;text-align:center;padding:60px 40px}
+.cl-main{font-size:clamp(20px,4vw,52px);font-weight:900;color:#fff;line-height:1.1;letter-spacing:-1px;margin-bottom:24px;opacity:0;max-width:800px}
+.cl-main em{font-style:normal;color:#4ade80}
+.cl-tagline{font-size:clamp(14px,2vw,24px);color:rgba(255,255,255,.5);font-weight:300;opacity:0;letter-spacing:.5px}
+
+/* ── PROGRESS BAR ── */
+#progress{position:fixed;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08);z-index:100}
+#progress-fill{height:100%;background:#4ade80;width:0%;transition:width .3s linear}
+
+/* ── RESTART ── */
+#restart-btn{position:fixed;bottom:32px;right:32px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:10px 22px;font-size:13px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;z-index:100;font-family:'Sora',sans-serif;transition:all .2s;opacity:0;letter-spacing:.3px}
+#restart-btn:hover{background:rgba(255,255,255,.22);color:#fff}
+#restart-btn.show{opacity:1}
+
+/* ── SCENE TITLE OVERLAY ── */
+.scene-caption{position:fixed;top:28px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);z-index:100;transition:opacity .4s;opacity:0;white-space:nowrap}
+.scene-caption.show{opacity:1}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fu{animation:fadeUp .7s forwards}
+.fi{animation:fadeIn .7s forwards}
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- S0: TITLE -->
+  <div class="scene active" id="s-title">
+    <div class="title-rings" aria-hidden="true">
+      <svg viewBox="0 0 700 700"><circle cx="350" cy="350" r="150" fill="none" stroke="white" stroke-width=".5"/><circle cx="350" cy="350" r="230" fill="none" stroke="white" stroke-width=".5"/><circle cx="350" cy="350" r="310" fill="none" stroke="white" stroke-width=".5"/></svg>
+    </div>
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px">
+      <div class="title-eyebrow" id="te">🛡️ &nbsp; AlertAU &nbsp; · &nbsp; Hackathon 2026</div>
+      <h1 class="title-h" id="th">Finally know exactly<br><span>why you're at risk</span></h1>
+      <p class="title-sub" id="ts">Not just that you are.</p>
+    </div>
+  </div>
+
+  <!-- S1: PROBLEM STAT -->
+  <div class="scene" id="s-problem">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px">
+      <div class="prob-stat" id="ps">14</div>
+      <div class="prob-label" id="pl">minutes. The average warning time a family receives before a bushfire reaches their property.</div>
+      <div class="prob-quote" id="pq">"Bushfire warning for the East Gippsland region." — <strong>That's the entire alert. No wind direction. No evacuation route. No reason.</strong></div>
+    </div>
+  </div>
+
+  <!-- S2: THE OLD WAY -->
+  <div class="scene" id="s-oldway">
+    <div style="display:flex;flex-direction:column;align-items:center;padding:40px">
+      <div class="oldway-label" id="ol">What every other app does</div>
+      <div class="oldway-phone" id="op">
+        <div class="op-statusbar"><span class="op-sb-t">11:47 PM</span><span class="op-sb-i">●●● WiFi 🔋</span></div>
+        <div style="background:#000;height:60px;display:flex;align-items:center;justify-content:center">
+          <div style="font-size:42px;font-weight:200;color:#fff;font-family:'DM Mono',monospace">11:47</div>
+        </div>
+        <div class="op-notif" id="on">
+          <div class="op-notif-app">Emergency Alert</div>
+          <div class="op-notif-title">🔥 Bushfire Warning</div>
+          <div class="op-notif-body">Bushfire warning for the East Gippsland region. Monitor conditions.</div>
+        </div>
+        <div style="height:100px;background:#000"></div>
+      </div>
+      <div class="oldway-verdict" id="ov">No wind direction. No distance. No evacuation route.<br><strong>No reason why it affects you.</strong></div>
+    </div>
+  </div>
+
+  <!-- S3: THE NEW WAY -->
+  <div class="scene" id="s-newway">
+    <div style="display:flex;flex-direction:column;align-items:center;padding:40px">
+      <div class="newway-label" id="nl">AlertAU</div>
+      <div class="newway-phone" id="np">
+        <div class="np-statusbar"><span class="np-sb-t">11:47 PM</span><span class="np-sb-i">●●● WiFi 🔋</span></div>
+        <div style="background:#0a0f1a;height:60px;display:flex;align-items:center;justify-content:center">
+          <div style="font-size:42px;font-weight:200;color:#fff;font-family:'DM Mono',monospace">11:47</div>
+        </div>
+        <div class="np-notif" id="nn">
+          <div class="np-notif-bar"><span>🚨 AlertAU — Emergency Warning</span><time>now</time></div>
+          <div class="np-notif-body">
+            <div class="np-title">🔥 EVACUATE NOW — Gippsland Fire</div>
+            <div class="np-why" id="nw">
+              <div class="np-why-lbl">⚠ Why you're at risk</div>
+              <div class="np-why-txt">Fire is 12km south-east. Wind is blowing directly toward your address at 35km/h. Estimated threat time: <strong style="color:#fff">under 20 minutes.</strong></div>
+            </div>
+            <div class="np-acts" id="na">
+              <div class="np-btn-r">📞 Call 000</div>
+              <div class="np-btn-g">My evacuation route →</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:80px;background:#0a0f1a"></div>
+      </div>
+      <div class="newway-tagline" id="nt">One fire. <strong>One family. One clear reason why.</strong></div>
+    </div>
+  </div>
+
+  <!-- S4: THE KEY LINE -->
+  <div class="scene" id="s-keyline">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px">
+      <div class="kl-pre" id="kp">The entire product is built around one idea:</div>
+      <div class="kl-main" id="km">We don't just tell you there's an emergency.<br>We tell you <em>why it affects you.</em></div>
+      <div class="kl-post" id="kpo">Your distance. The wind direction relative to your home. Your flood zone. Your evacuation route. In plain English. In under 30 seconds.</div>
+    </div>
+  </div>
+
+  <!-- S5: THREE PEOPLE -->
+  <div class="scene" id="s-three">
+    <div style="display:flex;flex-direction:column;align-items:center;width:100%;padding:40px 32px">
+      <div class="three-title" id="tt">The same fire.<br>Three different people. Three different WHY messages.</div>
+      <div class="three-sub" id="ts2">Because the fire doesn't affect everyone equally — and your alert shouldn't pretend it does.</div>
+      <div class="three-grid">
+        <div class="person-card" id="pc1">
+          <div class="pc-head"><span class="pc-avatar">👴</span><div><div class="pc-name">Margaret</div><div class="pc-loc">Traralgon · 8km from fire</div></div><div class="pc-risk" style="background:rgba(184,48,37,.15);color:#b83025;border:1px solid rgba(184,48,37,.3)">HIGH</div></div>
+          <div class="pc-who">Elderly. Lives alone. No car registered at address.</div>
+          <div class="pc-why" style="background:rgba(184,48,37,.08);border:1.5px solid rgba(184,48,37,.25)"><div class="pc-why-lbl" style="color:#b83025">⚠ Why Margaret is at risk</div><div class="pc-why-txt" style="color:#0c1d35">Fire 8km SE. Wind 40km/h toward her home. Mandatory evacuation Zone A. No vehicle at address.</div></div>
+          <div class="pc-action">Action: "SES community transport is 6 minutes away. Call 132 500 now."</div>
+        </div>
+        <div class="person-card" id="pc2">
+          <div class="pc-head"><span class="pc-avatar">👨‍👩‍👧</span><div><div class="pc-name">The Nguyens</div><div class="pc-loc">Sale · 35km from fire</div></div><div class="pc-risk" style="background:rgba(168,92,10,.12);color:#a85c0a;border:1px solid rgba(168,92,10,.3)">MED</div></div>
+          <div class="pc-who">Family with young children. Currently in Watch and Act zone.</div>
+          <div class="pc-why" style="background:rgba(168,92,10,.08);border:1.5px solid rgba(168,92,10,.2)"><div class="pc-why-lbl" style="color:#a85c0a">Why the Nguyens should prepare</div><div class="pc-why-txt" style="color:#0c1d35">Fire moving away now. Wind change forecast at 3pm may redirect toward Sale. Pack now, monitor closely.</div></div>
+          <div class="pc-action">Action: "Prepare kit now. If wind changes, evacuate via Princes Highway to Bairnsdale."</div>
+        </div>
+        <div class="person-card" id="pc3">
+          <div class="pc-head"><span class="pc-avatar">👩‍💼</span><div><div class="pc-name">Priya</div><div class="pc-loc">Melbourne CBD · 145km</div></div><div class="pc-risk" style="background:rgba(0,109,96,.1);color:#006d60;border:1px solid rgba(0,109,96,.25)">LOW</div></div>
+          <div class="pc-who">Office worker. No direct fire threat. Air quality concern only.</div>
+          <div class="pc-why" style="background:rgba(0,109,96,.07);border:1.5px solid rgba(0,109,96,.2)"><div class="pc-why-lbl" style="color:#006d60">Why Priya is informed, not alarmed</div><div class="pc-why-txt" style="color:#0c1d35">Fire is 145km east — no direct threat. Smoke forecast to reach CBD from 6pm. Air quality: Poor.</div></div>
+          <div class="pc-action">Action: "Close windows after 6pm. Air quality peaks around 9pm. No evacuation needed."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S6: MAP DEMO -->
+  <div class="scene" id="s-mapdemo">
+    <div class="md-label" id="mdl">Live demo — click any incident to see your personalised WHY</div>
+    <div class="md-window" id="mdw">
+      <div class="md-chrome">
+        <div class="md-dots"><div class="md-dot" style="background:#ff5f57"></div><div class="md-dot" style="background:#febc2e"></div><div class="md-dot" style="background:#28c840"></div></div>
+        <div class="md-url">alertau.app — Victoria — Your location: Melbourne CBD</div>
+        <div class="md-live"><span class="md-live-dot"></span>Live Feed Active</div>
+      </div>
+      <div class="md-body">
+        <div class="md-map">
+          <canvas id="demoCanvas"></canvas>
+          <div class="md-map-top">
+            <div class="md-map-name">Alert<sup>AU</sup></div>
+            <div class="md-map-badge"><span class="md-live-dot" style="width:6px;height:6px;margin-right:2px"></span>Victoria Live</div>
+          </div>
+          <div class="md-map-leg">
+            <div class="md-leg"><div class="md-legdot" style="background:#e74c3c"></div>Bushfire</div>
+            <div class="md-leg"><div class="md-legdot" style="background:#2980b9"></div>Flood</div>
+            <div class="md-leg"><div class="md-legdot" style="background:#8e44ad"></div>Storm</div>
+            <div class="md-leg"><div class="md-legdot" style="background:#d35400"></div>Heatwave</div>
+          </div>
+        </div>
+        <div class="md-sb">
+          <div class="md-sb-top">
+            <div class="md-sb-ey">Your Active Alerts</div>
+            <div class="md-sb-stats">
+              <div class="md-stat"><div class="md-stat-n" style="color:#b83025">2</div><div class="md-stat-l">High</div></div>
+              <div class="md-stat"><div class="md-stat-n" style="color:#a85c0a">2</div><div class="md-stat-l">Medium</div></div>
+              <div class="md-stat"><div class="md-stat-n" style="color:#006d60">2</div><div class="md-stat-l">Low</div></div>
+            </div>
+          </div>
+          <div class="md-inc-list" id="incList"></div>
+          <div class="md-detail" id="detailPanel">
+            <div class="md-det-inner">
+              <div class="md-det-head">
+                <div class="md-det-icon" id="det-icon">🔥</div>
+                <div class="md-det-name" id="det-name">Gippsland Complex Fire</div>
+                <div class="md-det-risk" id="det-risk" style="background:rgba(184,48,37,.12);color:#b83025;border:1px solid rgba(184,48,37,.3)">HIGH</div>
+                <div class="md-ai-tag">AI</div>
+              </div>
+              <div class="md-why-box" id="det-why">
+                <div class="md-why-lbl">⚠ Why you are at risk</div>
+                <div class="md-why-txt" id="det-why-txt">The fire is 42km south-east. Wind at 35km/h is blowing directly toward your address. Watch and Act zone. Threat time under 20 minutes if wind strengthens.</div>
+              </div>
+              <div class="md-ai-out" id="det-ai"></div>
+              <div class="md-det-btns" id="det-btns">
+                <div class="md-btn red">📞 Call 000</div>
+                <div class="md-btn">Evacuation route</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S7: CLOSE -->
+  <div class="scene" id="s-close">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px">
+      <div class="cl-main" id="cm">The data has always existed.<br>We built the thing that explains<br><em>why it's coming for you.</em></div>
+      <div class="cl-tagline" id="ct">— AlertAU · Hackathon 2026 —</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PROGRESS -->
+<div id="progress"><div id="progress-fill"></div></div>
+<button id="restart-btn" onclick="restart()">↺ Replay</button>
+<div class="scene-caption" id="scene-caption"></div>
+
+<script>
+/* ════════════════════════════════════
+   INCIDENT DATA
+════════════════════════════════════ */
+const INC=[
+  {id:1,name:"Gippsland Complex Fire",type:"fire",risk:"HIGH",x:.74,y:.52,r:50,dist:"42 km SE",info:"Wind-driven · 3,400ha · Total fire ban",why:"The fire is 42km south-east. Wind at 35km/h is blowing directly toward your address. Watch and Act zone. Threat time under 20 minutes if wind strengthens.",ai:"Leave now if in Zones A or B. Use Princes Highway West. Turn off evaporative cooling. Tune to ABC 774 AM. Call 000 for immediate danger."},
+  {id:2,name:"Murray River Flooding",type:"flood",risk:"HIGH",x:.27,y:.22,r:44,dist:"18 km N",info:"SES evacuation order · Flood peak 6am",why:"Your street is below the 12m flood line (Zone B). If the levee breaches, inundation could reach your area within 4 hours.",ai:"Move valuables to highest floor. Call SES 132 500. Avoid Swan Hill Bridge — submerged. Check bom.gov.au every 30 minutes."},
+  {id:3,name:"Severe Thunderstorm",type:"storm",risk:"MED",x:.61,y:.70,r:65,dist:"31 km E",info:"90km/h gusts · Large hail · Moving NW",why:"Storm is 31km east moving NW at 40km/h — reaches your area in ~45 minutes.",ai:"Go indoors. Secure outdoor items. If driving, pull over away from trees. Check BOM radar at bom.gov.au."},
+  {id:4,name:"Wimmera Heatwave",type:"heat",risk:"MED",x:.17,y:.36,r:80,dist:"85 km NW",info:"Day 3 · 44°C tomorrow",why:"Your suburb will reach 39°C tomorrow. Nearest cooling centre: Swan Hill Library — 2.3km from your address.",ai:"Stay indoors 10am–5pm. Drink water every 30 minutes. Check on elderly neighbours. Cooling centres are open and free."},
+  {id:5,name:"Dandenong Spotfire",type:"fire",risk:"LOW",x:.65,y:.56,r:22,dist:"28 km E",info:"Contained · 40ha · Crews on scene",why:"Currently contained 28km east. Wind not toward your location. Monitoring only — no action required.",ai:"Monitor CFA at cfa.vic.gov.au. Keep emergency kit ready. Leave if alert level rises."},
+  {id:6,name:"East Gippsland Flood",type:"flood",risk:"LOW",x:.86,y:.67,r:20,dist:"112 km E",info:"Minor tidal flooding · Coastal roads",why:"112km from your location — no direct threat. Travel warning for East Gippsland coastal roads only.",ai:"Avoid Metung Road if travelling east. Check vicroads.vic.gov.au for current conditions."},
+];
+const TYPES={fire:{color:"#e74c3c",icon:"🔥"},flood:{color:"#2980b9",icon:"🌊"},storm:{color:"#8e44ad",icon:"⛈️"},heat:{color:"#d35400",icon:"🌡️"}};
+const RS={HIGH:{bg:"rgba(184,48,37,.12)",c:"#b83025",b:"rgba(184,48,37,.3)"},MED:{bg:"rgba(168,92,10,.12)",c:"#a85c0a",b:"rgba(168,92,10,.3)"},LOW:{bg:"rgba(0,109,96,.1)",c:"#006d60",b:"rgba(0,109,96,.25)"}};
+
+/* ════════════════════════════════════
+   CANVAS MAP
+════════════════════════════════════ */
+const cvs=document.getElementById('demoCanvas');
+const ctx=cvs.getContext('2d');
+let selId=null,mapT=0;
+function resizeCvs(){const p=cvs.parentElement;cvs.width=p.clientWidth;cvs.height=p.clientHeight}
+resizeCvs();window.addEventListener('resize',resizeCvs);
+
+function drawBase(W,H){ctx.fillStyle='#ddeaf5';ctx.fillRect(0,0,W,H);ctx.strokeStyle='rgba(12,29,53,.055)';ctx.lineWidth=1;for(let x=0;x<W;x+=44){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=44){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}[['#c8d8a8',.5,.5,240,190,.1],['#d4c89a',.2,.7,150,110,.4],['#bfd4a4',.75,.3,170,120,-.2],['#e8d9b0',.8,.75,130,90,.3],['#c4d8e8',.1,.2,95,75,0]].forEach(([col,cx,cy,rx,ry,rot])=>{ctx.save();ctx.translate(cx*W,cy*H);ctx.rotate(rot);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore()});ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,H*.5);ctx.lineTo(W,H*.5);ctx.stroke();ctx.beginPath();ctx.moveTo(W*.5,0);ctx.lineTo(W*.5,H);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,H*.25);ctx.bezierCurveTo(W*.3,H*.22,W*.6,H*.28,W,H*.26);ctx.stroke();ctx.beginPath();ctx.arc(W*.5,H*.5,4,0,Math.PI*2);ctx.fillStyle='#0c1d35';ctx.fill();ctx.fillStyle='rgba(12,29,53,.65)';ctx.font='bold 11px Sora,sans-serif';ctx.textAlign='center';ctx.fillText('Melbourne',W*.5,H*.5-12)}
+function drawMarkers(){INC.forEach(inc=>{const x=inc.x*cvs.width,y=inc.y*cvs.height,col=TYPES[inc.type].color,isSel=inc.id===selId;ctx.save();ctx.globalAlpha=.18;ctx.beginPath();ctx.arc(x,y,inc.r*.85+(Math.sin(mapT/900+inc.id*1.3)*.5+.5)*7,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();ctx.globalAlpha=1;const g=ctx.createRadialGradient(x,y,0,x,y,inc.r*.75);g.addColorStop(0,col+'28');g.addColorStop(1,col+'00');ctx.beginPath();ctx.arc(x,y,inc.r*.75,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();if(isSel){ctx.beginPath();ctx.arc(x,y,15,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=3;ctx.globalAlpha=.45;ctx.stroke();ctx.globalAlpha=1}ctx.beginPath();ctx.arc(x,y+2,isSel?11:8,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.15)';ctx.fill();ctx.beginPath();ctx.arc(x,y,isSel?10:7,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.beginPath();ctx.arc(x,y,isSel?10:7,0,Math.PI*2);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.restore()})}
+function mapLoop(){drawBase(cvs.width,cvs.height);drawMarkers();mapT+=16;requestAnimationFrame(mapLoop)}
+mapLoop();
+
+function renderList(){
+  document.getElementById('incList').innerHTML=[...INC].sort((a,b)=>({HIGH:0,MED:1,LOW:2}[a.risk]-{HIGH:0,MED:1,LOW:2}[b.risk])).map(i=>{
+    const ri=RS[i.risk];
+    return`<div class="md-inc${i.id===selId?' active-inc':''}" style="border-left-color:${TYPES[i.type].color}" onclick="selectInc(${i.id})">
+      <div class="md-inc-top"><div class="md-inc-name">${TYPES[i.type].icon} ${i.name}</div><div class="md-risk" style="background:${ri.bg};color:${ri.c};border:1px solid ${ri.b}">${i.risk}</div></div>
+      <div class="md-inc-meta">${i.dist} · ${i.info}</div>
+    </div>`;
+  }).join('')}
+renderList();
+
+function selectInc(id){
+  selId=id;renderList();
+  const inc=INC.find(i=>i.id===id);
+  const ri=RS[inc.risk];
+  document.getElementById('det-icon').textContent=TYPES[inc.type].icon;
+  document.getElementById('det-name').textContent=inc.name;
+  document.getElementById('det-risk').textContent=inc.risk;
+  document.getElementById('det-risk').style.cssText=`background:${ri.bg};color:${ri.c};border:1px solid ${ri.b};font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px`;
+  document.getElementById('det-why-txt').textContent=inc.why;
+  document.getElementById('det-ai').textContent='';
+  const dp=document.getElementById('detailPanel');dp.classList.add('open');
+  const wb=document.getElementById('det-why'),ao=document.getElementById('det-ai'),db=document.getElementById('det-btns');
+  wb.classList.remove('show');ao.classList.remove('show');db.classList.remove('show');
+  setTimeout(()=>wb.classList.add('show'),100);
+  setTimeout(()=>{ao.classList.add('show');let i=0;const iv=setInterval(()=>{ao.textContent+=inc.ai[i++];if(i>=inc.ai.length)clearInterval(iv)},12)},400);
+  setTimeout(()=>db.classList.add('show'),700);
+}
+cvs.addEventListener('click',e=>{const r=cvs.getBoundingClientRect(),mx=(e.clientX-r.left)*(cvs.width/r.width),my=(e.clientY-r.top)*(cvs.height/r.height);let hit=null,best=999;INC.forEach(i=>{const d=Math.hypot(mx-i.x*cvs.width,my-i.y*cvs.height);if(d<18&&d<best){best=d;hit=i}});if(hit)selectInc(hit.id)});
+
+/* ════════════════════════════════════
+   SCENE SEQUENCE ENGINE
+════════════════════════════════════ */
+const SCENE_CAPTIONS=["Opening","The problem","Every other app","AlertAU","The core idea","Same fire, three people","Live demo","Closing"];
+const SCENES=['s-title','s-problem','s-oldway','s-newway','s-keyline','s-three','s-mapdemo','s-close'];
+let cur=0,sceneTimer=null,subTimer=[];
+
+const SCENE_DURATIONS=[3800,4500,5000,5500,5000,7000,0,4500];// 0 = stays until play pressed
+
+function e(id){return document.getElementById(id)}
+function show(id,delay=0){setTimeout(()=>{const el=e(id);if(el){el.style.animation='none';el.offsetHeight;el.style.animation='';el.style.opacity=1;el.classList.add('fu')}},delay)}
+function fadein(id,delay=0){setTimeout(()=>{const el=e(id);if(el){el.style.opacity=1;el.classList.add('fi')}},delay)}
+
+/* Per-scene animation sequences */
+function runScene(idx){
+  const id=SCENES[idx];
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.scene').forEach(s=>{[...s.querySelectorAll('[style]')].forEach(el=>{if(!el.closest('.md-window')&&!el.closest('.phone-frame'))el.style.opacity=''})});
+  e(id).classList.add('active');
+  updateProgress(idx);
+  const cap=e('scene-caption');cap.textContent=SCENE_CAPTIONS[idx];cap.classList.add('show');
+  setTimeout(()=>cap.classList.remove('show'),2000);
+
+  subTimer.forEach(clearTimeout);subTimer=[];
+
+  if(idx===0){
+    subTimer.push(setTimeout(()=>show('te'),200));
+    subTimer.push(setTimeout(()=>show('th'),700));
+    subTimer.push(setTimeout(()=>fadein('ts'),1400));
+  }
+  if(idx===1){
+    subTimer.push(setTimeout(()=>show('ps',0),100));
+    subTimer.push(setTimeout(()=>show('pl'),800));
+    subTimer.push(setTimeout(()=>show('pq'),2000));
+  }
+  if(idx===2){
+    subTimer.push(setTimeout(()=>fadein('ol'),200));
+    subTimer.push(setTimeout(()=>{const op=e('op');op.style.opacity=1;op.style.transform='none';op.classList.add('fu')},500));
+    subTimer.push(setTimeout(()=>{const on=e('on');on.style.opacity=1;on.style.transform='none';on.classList.add('fu')},1200));
+    subTimer.push(setTimeout(()=>show('ov'),2500));
+  }
+  if(idx===3){
+    subTimer.push(setTimeout(()=>fadein('nl'),200));
+    subTimer.push(setTimeout(()=>{const np=e('np');np.style.opacity=1;np.style.transform='none';np.classList.add('fu')},500));
+    subTimer.push(setTimeout(()=>{const nn=e('nn');nn.style.opacity=1;nn.style.transform='none';nn.classList.add('fu')},1200));
+    subTimer.push(setTimeout(()=>{e('nw').style.opacity=1;e('nw').classList.add('fi')},2000));
+    subTimer.push(setTimeout(()=>{e('na').style.opacity=1;e('na').classList.add('fi')},2800));
+    subTimer.push(setTimeout(()=>show('nt'),3500));
+  }
+  if(idx===4){
+    subTimer.push(setTimeout(()=>show('kp'),300));
+    subTimer.push(setTimeout(()=>show('km'),900));
+    subTimer.push(setTimeout(()=>show('kpo'),2000));
+  }
+  if(idx===5){
+    subTimer.push(setTimeout(()=>show('tt'),200));
+    subTimer.push(setTimeout(()=>fadein('ts2'),800));
+    subTimer.push(setTimeout(()=>{const pc=e('pc1');pc.style.opacity=1;pc.style.transform='none';pc.classList.add('fu')},1200));
+    subTimer.push(setTimeout(()=>{const pc=e('pc2');pc.style.opacity=1;pc.style.transform='none';pc.classList.add('fu')},1700));
+    subTimer.push(setTimeout(()=>{const pc=e('pc3');pc.style.opacity=1;pc.style.transform='none';pc.classList.add('fu')},2200));
+  }
+  if(idx===6){
+    subTimer.push(setTimeout(()=>fadein('mdl'),200));
+    subTimer.push(setTimeout(()=>{const mw=e('mdw');mw.style.opacity=1;mw.style.transform='none';mw.classList.add('fi')},600));
+    subTimer.push(setTimeout(()=>selectInc(1),2500));
+    subTimer.push(setTimeout(()=>selectInc(2),7000));
+    subTimer.push(setTimeout(()=>selectInc(4),12000));
+  }
+  if(idx===7){
+    subTimer.push(setTimeout(()=>show('cm'),400));
+    subTimer.push(setTimeout(()=>fadein('ct'),2000));
+    subTimer.push(setTimeout(()=>{e('restart-btn').classList.add('show')},3000));
+  }
+
+  // Always auto-advance — this is a self-playing animation, not a slideshow
+  const dur = idx===6 ? 16000 : SCENE_DURATIONS[idx];
+  if(dur>0 && idx<SCENES.length-1){
+    sceneTimer=setTimeout(()=>advance(),dur);
+  }
+}
+
+function advance(){
+  if(cur<SCENES.length-1){cur++;runScene(cur)}
+}
+
+function restart(){
+  subTimer.forEach(clearTimeout);subTimer=[];
+  clearTimeout(sceneTimer);
+  selId=null;
+  document.getElementById('detailPanel').classList.remove('open');
+  e('restart-btn').classList.remove('show');
+  // Reset all animations
+  document.querySelectorAll('.scene').forEach(s=>{
+    s.classList.remove('active');
+    s.querySelectorAll('*').forEach(el=>{el.style.opacity='';el.classList.remove('fu','fi')});
+  });
+  cur=0;
+  updateProgress(0);
+  runScene(0);
+}
+
+function updateProgress(idx){
+  e('progress-fill').style.width=((idx+1)/SCENES.length*100)+'%';
+}
+
+// Autoplay immediately on load — no button needed
+window.addEventListener('load',()=>{
+  // Small delay so fonts render before first animation
+  setTimeout(()=>runScene(0),400);
+});
+
+</script>
+</body>
+</html>

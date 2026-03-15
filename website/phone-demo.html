@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f2341">
+<title>AlertAU — Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #0f2341;
+  --navy2:  #1a3a5c;
+  --teal:   #007d6e;
+  --teal2:  #009e8c;
+  --red:    #c0392b;
+  --red2:   #e74c3c;
+  --amber:  #b7620a;
+  --bg:     #f5f3ee;
+  --bg2:    #edeae3;
+  --surface:#ffffff;
+  --text:   #1a1a2e;
+  --text2:  #3d4a5c;
+  --text3:  #6b7a8d;
+  --border: #d8d3c8;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%; width: 100%;
+  overflow: hidden;
+  font-family: 'Sora', sans-serif;
+  background: var(--navy);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* ── FULL SCREEN APP SHELL ── */
+.app-shell {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+  background: var(--bg);
+}
+.screen.off-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+.screen.off-left  { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+.screen.off-up    { transform: translateY(100%); opacity: 0; pointer-events: none; }
+
+/* ── STATUS BAR (ios style) ── */
+.statusbar {
+  background: var(--navy);
+  padding: max(env(safe-area-inset-top), 14px) 20px 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0; z-index: 10;
+}
+.statusbar.light { background: var(--bg); }
+.statusbar.light .sb-time { color: var(--navy); }
+.statusbar.light .sb-icons { color: var(--navy); }
+.sb-time  { font-size: 15px; font-weight: 700; color: #fff; font-family: 'DM Mono', monospace; }
+.sb-icons { font-size: 11px; color: rgba(255,255,255,0.8); }
+
+/* ── APP HEADER ── */
+.app-header {
+  background: var(--navy);
+  padding: 2px 20px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.app-name { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.app-name sup { font-size: 10px; color: var(--red2); vertical-align: super; font-weight: 700; }
+.app-live-badge {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.1); border-radius: 100px;
+  padding: 5px 12px; font-size: 11px; font-weight: 700; color: #4ade80;
+}
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: livepulse 1.5s infinite; }
+@keyframes livepulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(74,222,128,0.5); } 50%{ box-shadow: 0 0 0 5px rgba(74,222,128,0); } }
+
+/* ── TAB BAR ── */
+.tabbar {
+  display: flex; flex-shrink: 0;
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding-bottom: max(env(safe-area-inset-bottom), 8px);
+}
+.tab-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 10px 4px 4px;
+  background: transparent; border: none; cursor: pointer;
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+}
+.tab-icon  { font-size: 22px; line-height: 1; }
+.tab-label { font-size: 10px; font-weight: 600; color: var(--text3); font-family: 'Sora', sans-serif; }
+.tab-btn.on .tab-label { color: var(--navy); }
+.tab-btn.on .tab-indicator {
+  width: 20px; height: 3px; border-radius: 2px;
+  background: var(--navy); margin: 0 auto 2px; display: block;
+}
+.tab-indicator { display: none; }
+
+/* ═══════════════════════
+   SCREEN 1: LOCKED SCREEN EMERGENCY
+═══════════════════════ */
+#screen-lock {
+  background: linear-gradient(160deg, #0d1f3c 0%, #2a0a08 50%, #0d1a30 100%);
+  overflow: hidden;
+}
+.lock-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+#lock-pulse { position: absolute; inset: 0; background: rgba(192,57,43,0); transition: background 0.8s; z-index: 0; }
+.lock-content { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
+.lock-statusbar {
+  padding: max(env(safe-area-inset-top), 14px) 20px 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.lock-time-block { text-align: center; padding: 16px 20px 20px; }
+.lock-time { font-size: 72px; font-weight: 200; color: #fff; font-family: 'DM Mono', monospace; letter-spacing: -3px; line-height: 1; }
+.lock-date { font-size: 16px; color: rgba(255,255,255,0.6); margin-top: 6px; }
+/* Critical alert notification */
+.crit-notif {
+  margin: 0 14px; border-radius: 20px; overflow: hidden;
+  cursor: pointer; box-shadow: 0 8px 40px rgba(192,57,43,0.4);
+  animation: critslide 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes critslide { from { opacity:0; transform: translateY(-30px) scale(0.95); } to { opacity:1; transform: none; } }
+.crit-header {
+  background: var(--red); padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.crit-header-icon { font-size: 18px; animation: shake 0.5s infinite; }
+@keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
+.crit-app-name { font-size: 11px; font-weight: 800; color: #fff; letter-spacing: 1.5px; text-transform: uppercase; flex: 1; }
+.crit-time      { font-size: 11px; color: rgba(255,255,255,0.7); }
+.crit-body {
+  background: rgba(10,6,5,0.95);
+  padding: 16px;
+  backdrop-filter: blur(30px);
+}
+.crit-title { font-size: 18px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 8px; }
+.crit-msg   { font-size: 14px; color: rgba(255,255,255,0.82); line-height: 1.65; margin-bottom: 14px; }
+.crit-distance {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(192,57,43,0.25); border: 1px solid rgba(192,57,43,0.4);
+  border-radius: 100px; padding: 4px 12px;
+  font-size: 12px; font-weight: 700; color: #f87171; margin-bottom: 14px;
+}
+.crit-actions { display: flex; gap: 10px; }
+.crit-btn-red {
+  flex: 1; background: var(--red); border-radius: 12px; padding: 12px 8px;
+  text-align: center; font-size: 13px; font-weight: 800; color: #fff;
+  box-shadow: 0 4px 16px rgba(192,57,43,0.4);
+}
+.crit-btn-ghost {
+  flex: 1; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 8px;
+  text-align: center; font-size: 13px; font-weight: 700; color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+/* Stacked second notification */
+.stack-notif {
+  margin: 10px 14px 0; border-radius: 16px; overflow: hidden;
+  background: rgba(15,25,45,0.88); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+  animation: critslide 0.5s 0.15s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.stack-notif-inner { padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.stack-notif-icon  { font-size: 20px; flex-shrink: 0; }
+.stack-notif-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.stack-notif-sub   { font-size: 11px; color: rgba(255,255,255,0.5); }
+.stack-notif-time  { font-size: 10px; color: rgba(255,255,255,0.35); flex-shrink: 0; }
+.lock-swipe-hint {
+  text-align: center; padding: 20px;
+  font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px;
+}
+.lock-swipe-arrow { font-size: 18px; color: rgba(255,255,255,0.2); margin-top: 4px; animation: lockbounce 2s infinite; }
+@keyframes lockbounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+/* ═══════════════════════
+   SCREEN 2: MAP
+═══════════════════════ */
+#screen-map { background: var(--navy); }
+.map-container { flex: 1; position: relative; overflow: hidden; }
+#mapCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.map-hud {
+  position: absolute; top: 12px; left: 12px; right: 12px;
+  display: flex; gap: 8px; z-index: 10; pointer-events: none;
+}
+.map-hud-pill {
+  background: rgba(15,35,65,0.88); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+  padding: 8px 12px; flex: 1; text-align: center;
+}
+.map-hud-n    { font-size: 16px; font-weight: 800; font-family: 'DM Mono', monospace; line-height: 1; margin-bottom: 1px; }
+.map-hud-l    { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; }
+.map-legend {
+  position: absolute; bottom: 12px; left: 12px; right: 12px;
+  background: rgba(15,35,65,0.88); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+  padding: 10px 14px;
+  display: flex; gap: 14px; flex-wrap: wrap; z-index: 10; pointer-events: none;
+}
+.leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255,255,255,0.75); font-weight: 500; }
+.legdot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+/* Tap-to-select popup */
+.inc-popup {
+  position: absolute; bottom: 80px; left: 12px; right: 12px;
+  background: rgba(10,16,30,0.96); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+  padding: 14px; z-index: 20;
+  animation: popslide 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  cursor: pointer;
+}
+@keyframes popslide { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+.popup-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.popup-icon { font-size: 22px; flex-shrink: 0; }
+.popup-title { font-size: 15px; font-weight: 800; color: #fff; flex: 1; line-height: 1.2; }
+.popup-risk {
+  font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 100px;
+  background: rgba(192,57,43,0.2); color: #f87171; border: 1px solid rgba(192,57,43,0.35);
+  white-space: nowrap;
+}
+.popup-meta { font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 10px; }
+.popup-btn {
+  width: 100%; background: var(--red); border-radius: 10px; padding: 11px;
+  text-align: center; font-size: 13px; font-weight: 800; color: #fff;
+  box-shadow: 0 4px 16px rgba(192,57,43,0.35);
+}
+
+/* ═══════════════════════
+   SCREEN 3: ALERT LIST
+═══════════════════════ */
+#screen-list { background: var(--bg); }
+.list-header { background: var(--navy); padding: 2px 20px 16px; flex-shrink: 0; }
+.list-header-title { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+.list-header-sub   { font-size: 12px; color: rgba(255,255,255,0.5); }
+.list-stats { display: flex; gap: 8px; padding: 12px 16px 4px; flex-shrink: 0; }
+.list-stat {
+  flex: 1; background: var(--surface); border-radius: 10px;
+  padding: 10px 6px; text-align: center; border: 1.5px solid var(--border);
+}
+.list-stat-n { font-size: 22px; font-weight: 800; font-family: 'DM Mono', monospace; line-height: 1; }
+.list-stat-l { font-size: 10px; color: var(--text3); font-weight: 600; margin-top: 2px; }
+.inc-scroll { flex: 1; overflow-y: auto; padding: 8px 14px 16px; -webkit-overflow-scrolling: touch; }
+.inc-scroll::-webkit-scrollbar { display: none; }
+.inc-item {
+  background: var(--surface); border-radius: 14px;
+  border: 1.5px solid var(--border); border-left-width: 4px;
+  padding: 14px; margin-bottom: 10px; cursor: pointer;
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 8px rgba(15,35,65,0.06);
+}
+.inc-item:active { transform: scale(0.98); }
+.inc-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+.inc-item-name { font-size: 14px; font-weight: 700; color: var(--navy); line-height: 1.3; flex: 1; }
+.risk-badge {
+  font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 100px;
+  white-space: nowrap; flex-shrink: 0; letter-spacing: 0.5px;
+}
+.inc-item-meta { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ═══════════════════════
+   SCREEN 4: DETAIL / AI BRIEF
+═══════════════════════ */
+#screen-detail { background: var(--bg); }
+.detail-header {
+  background: var(--navy); padding: 2px 20px 16px; flex-shrink: 0;
+}
+.detail-back {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 10px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  width: fit-content; padding: 4px 0;
+}
+.detail-title { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.25; }
+.detail-body { flex: 1; overflow-y: auto; padding: 14px 16px 100px; -webkit-overflow-scrolling: touch; }
+.detail-body::-webkit-scrollbar { display: none; }
+.risk-card {
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+.risk-card-icon { font-size: 32px; flex-shrink: 0; }
+.risk-card-title { font-size: 16px; font-weight: 800; margin-bottom: 3px; }
+.risk-card-sub   { font-size: 12px; opacity: 0.8; line-height: 1.5; }
+.ai-card {
+  background: var(--surface); border-radius: 14px; padding: 16px;
+  border: 1.5px solid rgba(0,125,110,0.2); margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0,125,110,0.08);
+}
+.ai-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ai-card-title  { font-size: 14px; font-weight: 700; color: var(--navy); }
+.ai-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px;
+  background: rgba(0,125,110,0.1); color: var(--teal);
+  border: 1px solid rgba(0,125,110,0.25);
+}
+.ai-output { font-size: 15px; color: var(--text2); line-height: 1.75; }
+.contacts-card {
+  background: var(--surface); border-radius: 14px; padding: 16px;
+  border: 1.5px solid var(--border); margin-bottom: 12px;
+}
+.contacts-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.contact-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.contact-row:last-child { border-bottom: none; padding-bottom: 0; }
+.contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.contact-name  { font-size: 14px; font-weight: 700; color: var(--navy); }
+.contact-sub   { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.contact-arrow { margin-left: auto; font-size: 18px; color: var(--text3); }
+/* Fixed action bar */
+.fixed-actions {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 12px 16px max(env(safe-area-inset-bottom), 12px);
+  display: flex; gap: 10px; z-index: 20;
+}
+.fixed-btn {
+  flex: 1; padding: 14px 10px; border-radius: 12px; border: none;
+  font-size: 15px; font-weight: 800; font-family: 'Sora', sans-serif;
+  cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+}
+.fixed-btn:active { transform: scale(0.97); }
+.fixed-btn-red { background: var(--red); color: #fff; box-shadow: 0 4px 16px rgba(192,57,43,0.3); }
+.fixed-btn-outline { background: transparent; color: var(--navy); border: 2px solid var(--border); }
+
+/* ── LOADING DOTS ── */
+.loading-dots { display: flex; align-items: center; gap: 6px; padding: 8px 0; }
+.loading-dots span { font-size: 13px; color: var(--text3); }
+.loading-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); display: inline-block; animation: dp 1.2s infinite; }
+.loading-dots i:nth-child(2){ animation-delay:.2s }
+.loading-dots i:nth-child(3){ animation-delay:.4s }
+@keyframes dp { 0%,80%,100%{opacity:.15;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="app">
+
+  <!-- ══════════════════════════════════
+       SCREEN 1: LOCKED SCREEN EMERGENCY
+  ══════════════════════════════════ -->
+  <div class="screen" id="screen-lock" style="background:linear-gradient(160deg,#0d1f3c 0%,#2a0a08 50%,#0d1a30 100%)">
+    <div class="lock-grid"></div>
+    <div id="lock-pulse" style="position:absolute;inset:0;z-index:1;background:rgba(192,57,43,0);transition:background 0.8s;pointer-events:none"></div>
+    <div class="lock-content">
+      <div class="lock-statusbar">
+        <span style="font-size:15px;font-weight:700;color:#fff;font-family:'DM Mono',monospace" id="lockTime">9:41</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.75)">●●●  WiFi  🔋</span>
+      </div>
+      <div class="lock-time-block">
+        <div class="lock-time" id="lockTimeBig">9:41</div>
+        <div class="lock-date" id="lockDate">Sunday, 15 March</div>
+      </div>
+      <!-- Main emergency notification -->
+      <div class="crit-notif" onclick="goTo('detail')">
+        <div class="crit-header">
+          <div class="crit-header-icon">🚨</div>
+          <div class="crit-app-name">AlertAU — Emergency Warning</div>
+          <div class="crit-time">now</div>
+        </div>
+        <div class="crit-body">
+          <div class="crit-title">🔥 EVACUATE NOW — Gippsland Fire</div>
+          <div class="crit-distance">⚠️ Fire is 12km away and closing fast</div>
+          <div class="crit-msg">Leave immediately via Princes Highway West. Do not go back for possessions. Shelter is available at Sale Recreation Centre.</div>
+          <div class="crit-actions">
+            <div class="crit-btn-red" onclick="event.stopPropagation();callEmergency()">📞 Call 000</div>
+            <div class="crit-btn-ghost">Safety plan →</div>
+          </div>
+        </div>
+      </div>
+      <!-- Stacked secondary notification -->
+      <div class="stack-notif">
+        <div class="stack-notif-inner">
+          <div class="stack-notif-icon">🌊</div>
+          <div style="flex:1">
+            <div class="stack-notif-title">Flood Warning — Murray River</div>
+            <div class="stack-notif-sub">Evacuation order · 18km · SES 132 500</div>
+          </div>
+          <div class="stack-notif-time">2m</div>
+        </div>
+      </div>
+      <div class="lock-swipe-hint">
+        <div>Tap alert for full safety instructions</div>
+        <div class="lock-swipe-arrow">↑</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCREEN 2: MAP
+  ══════════════════════ -->
+  <div class="screen off-right" id="screen-map">
+    <div class="statusbar">
+      <span class="sb-time" id="mapTime">9:41</span>
+      <span class="sb-icons">●●●  WiFi  🔋</span>
+    </div>
+    <div class="app-header">
+      <div class="app-name">Alert<sup>AU</sup></div>
+      <div class="app-live-badge"><div class="live-dot"></div>Victoria Live</div>
+    </div>
+    <div class="map-container">
+      <canvas id="mapCanvas"></canvas>
+      <!-- HUD stats -->
+      <div class="map-hud">
+        <div class="map-hud-pill"><div class="map-hud-n" style="color:#f87171">2</div><div class="map-hud-l">HIGH</div></div>
+        <div class="map-hud-pill"><div class="map-hud-n" style="color:#fb923c">2</div><div class="map-hud-l">MEDIUM</div></div>
+        <div class="map-hud-pill"><div class="map-hud-n" style="color:#4ade80">2</div><div class="map-hud-l">LOW</div></div>
+      </div>
+      <!-- Legend -->
+      <div class="map-legend">
+        <div class="leg"><div class="legdot" style="background:#e74c3c"></div>Bushfire</div>
+        <div class="leg"><div class="legdot" style="background:#2980b9"></div>Flood</div>
+        <div class="leg"><div class="legdot" style="background:#8e44ad"></div>Storm</div>
+        <div class="leg"><div class="legdot" style="background:#d35400"></div>Heatwave</div>
+      </div>
+      <!-- Tap popup -->
+      <div class="inc-popup" id="mapPopup" onclick="goTo('detail')" style="display:none">
+        <div class="popup-head">
+          <div class="popup-icon">🔥</div>
+          <div class="popup-title">Gippsland Complex Fire</div>
+          <div class="popup-risk">HIGH</div>
+        </div>
+        <div class="popup-meta">42 km SE · Wind-driven · 3,400ha · Total fire ban in effect</div>
+        <div class="popup-btn">View AI Safety Instructions →</div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <button class="tab-btn on" onclick="goTo('map')"><div class="tab-indicator"></div><div class="tab-icon">🗺️</div><div class="tab-label">Map</div></button>
+      <button class="tab-btn" onclick="goTo('list')"><div class="tab-indicator"></div><div class="tab-icon">⚠️</div><div class="tab-label">Alerts</div></button>
+      <button class="tab-btn" onclick="goTo('detail')"><div class="tab-indicator"></div><div class="tab-icon">🛡️</div><div class="tab-label">Safety</div></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCREEN 3: ALERT LIST
+  ══════════════════════ -->
+  <div class="screen off-right" id="screen-list">
+    <div class="statusbar">
+      <span class="sb-time" id="listTime">9:41</span>
+      <span class="sb-icons">●●●  WiFi  🔋</span>
+    </div>
+    <div class="list-header">
+      <div class="list-header-title">Active Alerts</div>
+      <div class="list-header-sub">Victoria · 6 incidents right now</div>
+    </div>
+    <div class="list-stats">
+      <div class="list-stat"><div class="list-stat-n" style="color:#c0392b">2</div><div class="list-stat-l">High</div></div>
+      <div class="list-stat"><div class="list-stat-n" style="color:#b7620a">2</div><div class="list-stat-l">Medium</div></div>
+      <div class="list-stat"><div class="list-stat-n" style="color:#007d6e">2</div><div class="list-stat-l">Low</div></div>
+    </div>
+    <div class="inc-scroll">
+      <div class="inc-item" style="border-left-color:#e74c3c" onclick="goTo('detail')">
+        <div class="inc-item-top">
+          <div class="inc-item-name">🔥 Gippsland Complex Fire</div>
+          <div class="risk-badge" style="background:rgba(192,57,43,0.12);color:#c0392b;border:1px solid rgba(192,57,43,0.3)">HIGH</div>
+        </div>
+        <div class="inc-item-meta">42 km SE · Wind-driven fire, 3,400ha · Total fire ban in effect</div>
+      </div>
+      <div class="inc-item" style="border-left-color:#2980b9" onclick="goTo('detail')">
+        <div class="inc-item-top">
+          <div class="inc-item-name">🌊 Murray River Flooding</div>
+          <div class="risk-badge" style="background:rgba(192,57,43,0.12);color:#c0392b;border:1px solid rgba(192,57,43,0.3)">HIGH</div>
+        </div>
+        <div class="inc-item-meta">18 km N · SES evacuation order issued · Flood peak tomorrow 6am</div>
+      </div>
+      <div class="inc-item" style="border-left-color:#8e44ad" onclick="goTo('detail')">
+        <div class="inc-item-top">
+          <div class="inc-item-name">⛈️ Severe Thunderstorm Warning</div>
+          <div class="risk-badge" style="background:rgba(183,98,10,0.12);color:#b7620a;border:1px solid rgba(183,98,10,0.3)">MED</div>
+        </div>
+        <div class="inc-item-meta">31 km E · Large hail and 90km/h gusts · Moving NW</div>
+      </div>
+      <div class="inc-item" style="border-left-color:#d35400" onclick="goTo('detail')">
+        <div class="inc-item-top">
+          <div class="inc-item-name">🌡️ Wimmera Heatwave</div>
+          <div class="risk-badge" style="background:rgba(183,98,10,0.12);color:#b7620a;border:1px solid rgba(183,98,10,0.3)">MED</div>
+        </div>
+        <div class="inc-item-meta">85 km NW · Day 3 · Forecast 44°C tomorrow</div>
+      </div>
+      <div class="inc-item" style="border-left-color:#e74c3c" onclick="goTo('detail')">
+        <div class="inc-item-top">
+          <div class="inc-item-name">🔥 Dandenong Ranges Spotfire</div>
+          <div class="risk-badge" style="background:rgba(0,125,110,0.1);color:#007d6e;border:1px solid rgba(0,125,110,0.25)">LOW</div>
+        </div>
+        <div class="inc-item-meta">28 km E · Contained · 40ha · Crews on scene</div>
+      </div>
+      <div class="inc-item" style="border-left-color:#2980b9" onclick="goTo('detail')">
+        <div class="inc-item-top">
+          <div class="inc-item-name">🌊 East Gippsland Coastal Flood</div>
+          <div class="risk-badge" style="background:rgba(0,125,110,0.1);color:#007d6e;border:1px solid rgba(0,125,110,0.25)">LOW</div>
+        </div>
+        <div class="inc-item-meta">112 km E · Minor tidal flooding · Coastal roads affected</div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <button class="tab-btn" onclick="goTo('map')"><div class="tab-indicator"></div><div class="tab-icon">🗺️</div><div class="tab-label">Map</div></button>
+      <button class="tab-btn on" onclick="goTo('list')"><div class="tab-indicator"></div><div class="tab-icon">⚠️</div><div class="tab-label">Alerts</div></button>
+      <button class="tab-btn" onclick="goTo('detail')"><div class="tab-indicator"></div><div class="tab-icon">🛡️</div><div class="tab-label">Safety</div></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       SCREEN 4: AI SAFETY BRIEF
+  ══════════════════════ -->
+  <div class="screen off-right" id="screen-detail">
+    <div class="statusbar">
+      <span class="sb-time" id="detailTime">9:41</span>
+      <span class="sb-icons">●●●  WiFi  🔋</span>
+    </div>
+    <div class="detail-header">
+      <div class="detail-back" onclick="goTo('list')">‹ Back to alerts</div>
+      <div class="detail-title">🔥 Gippsland Complex Fire</div>
+    </div>
+    <div class="detail-body">
+      <div class="risk-card" style="background:rgba(192,57,43,0.1);border:1.5px solid rgba(192,57,43,0.25)">
+        <div class="risk-card-icon">🚨</div>
+        <div>
+          <div class="risk-card-title" style="color:#c0392b">HIGH RISK — 42km away</div>
+          <div class="risk-card-sub" style="color:#c0392b">Wind-driven · 3,400ha burned · Total fire ban in effect · Moving NE at 35km/h</div>
+        </div>
+      </div>
+      <div class="ai-card">
+        <div class="ai-card-header">
+          <div class="ai-card-title">🤖 AI Safety Instructions</div>
+          <div class="ai-badge">GPT-4o</div>
+        </div>
+        <div class="ai-output" id="aiOutput"></div>
+        <div class="loading-dots" id="aiLoading">
+          <span><i></i><i></i><i></i></span>
+          <span>Generating safety instructions…</span>
+        </div>
+      </div>
+      <div class="contacts-card">
+        <div class="contacts-title">Emergency Contacts</div>
+        <div class="contact-row" onclick="callEmergency()">
+          <div class="contact-icon" style="background:rgba(192,57,43,0.1)">📞</div>
+          <div>
+            <div class="contact-name">Triple Zero — 000</div>
+            <div class="contact-sub">Police, Fire, Ambulance — immediate danger</div>
+          </div>
+          <div class="contact-arrow">›</div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon" style="background:rgba(41,128,185,0.1)">🌊</div>
+          <div>
+            <div class="contact-name">SES — 132 500</div>
+            <div class="contact-sub">Storms, floods, damage</div>
+          </div>
+          <div class="contact-arrow">›</div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon" style="background:rgba(249,115,22,0.1)">🔥</div>
+          <div>
+            <div class="contact-name">CFA — cfa.vic.gov.au</div>
+            <div class="contact-sub">Current fire warnings and zones</div>
+          </div>
+          <div class="contact-arrow">›</div>
+        </div>
+      </div>
+    </div>
+    <div class="fixed-actions">
+      <button class="fixed-btn fixed-btn-red" onclick="callEmergency()">📞 Call 000</button>
+      <button class="fixed-btn fixed-btn-outline" onclick="goTo('map')">View on map</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── LIVE TIME ──────────────────────────────────────────────
+function updateTime() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2,'0');
+  const m = now.getMinutes().toString().padStart(2,'0');
+  const t = `${h}:${m}`;
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const d = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+  ['lockTime','lockTimeBig','mapTime','listTime','detailTime'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = t;
+  });
+  const ld = document.getElementById('lockDate'); if(ld) ld.textContent = d;
+}
+updateTime(); setInterval(updateTime, 10000);
+
+// ── SCREEN ROUTING ─────────────────────────────────────────
+const SCREENS = ['lock','map','list','detail'];
+let currentScreen = 'lock';
+let aiDone = false;
+
+function goTo(name) {
+  const prev = currentScreen;
+  if(prev === name) return;
+  currentScreen = name;
+
+  SCREENS.forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    if(!el) return;
+    el.classList.remove('off-right','off-left','off-up');
+    if(s !== name) {
+      const pi = SCREENS.indexOf(prev), ni = SCREENS.indexOf(name), si = SCREENS.indexOf(s);
+      // lock screen slides up when leaving
+      if(s === 'lock') { el.classList.add('off-up'); return; }
+      el.classList.add(si < ni ? 'off-left' : 'off-right');
+    }
+  });
+
+  // Show map popup after 1.5s on map screen
+  if(name === 'map') {
+    setTimeout(() => {
+      const p = document.getElementById('mapPopup');
+      if(p) p.style.display = 'block';
+    }, 1500);
+  }
+
+  // Trigger AI text on detail screen
+  if(name === 'detail' && !aiDone) {
+    setTimeout(typeAI, 800);
+  }
+
+  // Lock screen pulse animation
+  if(name === 'lock') {
+    let pulses = 0;
+    const pulse = document.getElementById('lock-pulse');
+    const iv = setInterval(() => {
+      if(!pulse) { clearInterval(iv); return; }
+      pulse.style.background = pulses % 2 === 0 ? 'rgba(192,57,43,0.15)' : 'rgba(192,57,43,0)';
+      pulses++;
+      if(pulses > 6) clearInterval(iv);
+    }, 600);
+  }
+}
+
+// ── AI TYPEWRITER ──────────────────────────────────────────
+const AI_TEXT = "Leave immediately if you are in Zones A or B — do not wait to see flames or smoke. Use Princes Highway West as your evacuation route and avoid Traralgon Road. Close all windows and doors and turn off evaporative cooling to prevent embers entering your home. Tune to ABC Emergency 774 AM for live zone updates — this is the most reliable source during a fire emergency. If you are in immediate danger, call Triple Zero 000 right now.";
+
+function typeAI() {
+  const out = document.getElementById('aiOutput');
+  const ld  = document.getElementById('aiLoading');
+  if(!out || !ld) return;
+  ld.style.display = 'none';
+  out.style.display = 'block';
+  let i = 0;
+  aiDone = true;
+  const iv = setInterval(() => {
+    out.textContent += AI_TEXT[i++];
+    if(i >= AI_TEXT.length) clearInterval(iv);
+  }, 14);
+}
+
+// ── CALL 000 (demo only) ───────────────────────────────────
+function callEmergency() {
+  window.location.href = 'tel:000';
+}
+
+// ── CANVAS MAP ─────────────────────────────────────────────
+const INCIDENTS = [
+  {id:1,type:'fire', x:0.74,y:0.52,r:50,selId:1},
+  {id:2,type:'flood',x:0.27,y:0.22,r:44},
+  {id:3,type:'storm',x:0.61,y:0.70,r:65},
+  {id:4,type:'heat', x:0.17,y:0.36,r:80},
+  {id:5,type:'fire', x:0.65,y:0.56,r:22},
+  {id:6,type:'flood',x:0.86,y:0.67,r:20},
+];
+const COLS = { fire:'#e74c3c', flood:'#2980b9', storm:'#8e44ad', heat:'#d35400' };
+
+const cvs = document.getElementById('mapCanvas');
+const ctx = cvs.getContext('2d');
+
+function resizeCanvas() {
+  const p = cvs.parentElement;
+  cvs.width = p.clientWidth; cvs.height = p.clientHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawBase(W,H) {
+  ctx.fillStyle='#ddeaf5'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(15,35,65,0.06)'; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const patches=[['#c8d8a8',W*.5,H*.5,240,190,0.1],['#d4c89a',W*.2,H*.7,150,110,0.4],['#bfd4a4',W*.75,H*.3,170,120,-0.2],['#e8d9b0',W*.8,H*.75,130,90,0.3],['#c4d8e8',W*.1,H*.2,95,75,0]];
+  patches.forEach(([col,cx,cy,rx,ry,rot])=>{ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();});
+  ctx.strokeStyle='rgba(255,255,255,0.7)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,H*.5);ctx.lineTo(W,H*.5);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W*.5,0);ctx.lineTo(W*.5,H);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(0,H*.25);ctx.bezierCurveTo(W*.3,H*.22,W*.6,H*.28,W,H*.26);ctx.stroke();
+  ctx.beginPath();ctx.arc(W*.5,H*.5,4,0,Math.PI*2);ctx.fillStyle='#0f2341';ctx.fill();
+  ctx.fillStyle='rgba(15,35,65,0.65)';ctx.font='bold 11px Sora,sans-serif';ctx.textAlign='center';
+  ctx.fillText('Melbourne',W*.5,H*.5-12);
+}
+
+let t=0;
+function drawMarkers(W,H) {
+  INCIDENTS.forEach(inc=>{
+    const x=inc.x*W, y=inc.y*H, col=COLS[inc.type];
+    const isSel=inc.id===1;
+    const wave=Math.sin(t/900+inc.id*1.3)*0.5+0.5;
+    ctx.save();
+    ctx.globalAlpha=0.18;ctx.beginPath();ctx.arc(x,y,inc.r*.85+wave*7,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.globalAlpha=1;
+    const g=ctx.createRadialGradient(x,y,0,x,y,inc.r*.75);g.addColorStop(0,col+'30');g.addColorStop(1,col+'00');
+    ctx.beginPath();ctx.arc(x,y,inc.r*.75,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    if(isSel){ctx.beginPath();ctx.arc(x,y,15,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=3;ctx.globalAlpha=0.45;ctx.stroke();ctx.globalAlpha=1;}
+    ctx.beginPath();ctx.arc(x,y+2,isSel?11:8,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,isSel?10:7,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,isSel?10:7,0,Math.PI*2);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+    ctx.restore();
+  });
+}
+
+function animate(){
+  const W=cvs.width,H=cvs.height;
+  drawBase(W,H); drawMarkers(W,H); t+=16;
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Canvas tap to show popup
+cvs.addEventListener('click', e=>{
+  const r=cvs.getBoundingClientRect();
+  const mx=(e.clientX-r.left)*(cvs.width/r.width);
+  const my=(e.clientY-r.top)*(cvs.height/r.height);
+  let hit=false;
+  INCIDENTS.forEach(inc=>{
+    const d=Math.hypot(mx-inc.x*cvs.width, my-inc.y*cvs.height);
+    if(d<18) hit=true;
+  });
+  if(hit){ const p=document.getElementById('mapPopup'); if(p) p.style.display='block'; }
+});
+
+// ── INIT ───────────────────────────────────────────────────
+// Start with a pulse on the lock screen
+setTimeout(()=>{
+  let pulses=0;
+  const pulse=document.getElementById('lock-pulse');
+  const iv=setInterval(()=>{
+    if(!pulse){clearInterval(iv);return;}
+    pulse.style.background=pulses%2===0?'rgba(192,57,43,0.18)':'rgba(192,57,43,0)';
+    pulses++;
+    if(pulses>6) clearInterval(iv);
+  },700);
+},500);
+</script>
+</body>
+</html>

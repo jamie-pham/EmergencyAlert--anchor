@@ -1,0 +1,29 @@
+# API Keys — NEVER commit these
+.env
+*.env
+
+# Dependencies
+node_modules/
+.expo/
+
+# Build outputs
+dist/
+web-build/
+*.orig.*
+
+# iOS
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
